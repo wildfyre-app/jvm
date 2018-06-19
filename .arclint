@@ -1,0 +1,24 @@
+{
+  "exclude": ["(libs/)"],
+  "linters": {
+    "filename": {
+      "type": "filename"
+    },
+
+    "spelling": {
+      "type": "spelling"
+    },
+
+    "generated": {
+      "type": "generated"
+    },
+
+    "merge-conflict": {
+      "type": "merge-conflict"
+    },
+
+    "chmod": {
+      "type": "chmod"
+    }
+  }
+}
