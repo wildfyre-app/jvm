@@ -1,11 +1,26 @@
 plugins {
     id 'java'
+    id 'signing' // To GPG-sign the archives that will be published.
+    id 'maven' // To export to Maven
+    id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
 }
 
-group 'wildfyre'
-version '0.0-SNAPSHOT'
+group 'net.wildfyre'
+getVersion()
 
 sourceCompatibility = 1.8
+
+void getVersion(){
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'describe', '--tags', '--candidates=30', '--dirty=-SNAPSHOT'
+        standardOutput = stdout
+    }
+    version stdout
+        .toString()[1..-2]                      // Remove the \n character at the end of the command and the 'v'
+        .replaceFirst("-\\d+-", "-")            // Remove the number of commits
+    println "Detected project version: " + version
+}
 
 repositories {
     mavenCentral()
@@ -13,4 +28,81 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+// Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
+// Needed for publishing
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+// Sources task as seen at https://central.sonatype.org/pages/gradle.html
+// Needed for publishing
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+// Artifacts as seen at https://central.sonatype.org/pages/gradle.html
+// Needed for publishing
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+// Configuration for the Signing plugin to GPG-sign the archives (required by Sonatype to accept the new release).
+signing {
+    sign configurations.archives
+}
+
+task publish(dependsOn: uploadArchives){
+    // Placeholder task that is preceded by uploadArchives and followed by closeAndReleaseRepository,
+    // which are the two needed steps to fully release a new version.
+    // This allows to do "./gradlew publish".
+}
+publish.finalizedBy closeAndReleaseRepository
+
+// Adapted from https://central.sonatype.org/pages/gradle.html
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: nexusUsername, password: nexusPassword)
+            }
+
+            pom.project {
+                name 'WildFyre Client API'
+                packaging 'jar'
+                description "The WildFyre client API lets you connect to the servers from a Java or Android app."
+                url 'https://wildfyre.net'
+
+                scm {
+                    connection 'https://phabricator.wildfyre.net/source/libwf-java.git'
+                    developerConnection 'https://phabricator.wildfyre.net/source/libwf-java.git'
+                    url 'https://phabricator.wildfyre.net/source/libwf-java/'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'clovis-ai'
+                        name 'Ivan Canet'
+                        email 'ivan.canet@gmail.com'
+                    }
+                }
+            }
+        }
+    }
 }

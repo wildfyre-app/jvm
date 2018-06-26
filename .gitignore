@@ -24,6 +24,9 @@ hs_err_pid*
 .idea/dictionaries
 .idea/vcs.xml
 .idea/jsLibraryMappings.xml
+# IntelliJ Markdown Support plugin
+.idea/markdown-navigator.xml
+.idea/markdown-navigator/
 
 # Sensitive or high-churn files:
 .idea/dataSources.ids
@@ -103,3 +106,8 @@ gradle-app.setting
 
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
+
+# Publishing the project
+wildfyre.net
+publish-key.gpg
+gradle.properties
