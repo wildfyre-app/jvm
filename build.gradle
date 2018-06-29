@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'findbugs'
     id 'signing' // To GPG-sign the archives that will be published.
     id 'maven' // To export to Maven
     id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
@@ -19,7 +20,7 @@ void getVersion(){
     version stdout
         .toString()[1..-2]                      // Remove the \n character at the end of the command and the 'v'
         .replaceFirst("-\\d+-", "-")            // Remove the number of commits
-    println "Detected project version: " + version
+    println "-- Detected project version: " + version
 }
 
 repositories {
@@ -28,6 +29,13 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+    }
 }
 
 // Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
