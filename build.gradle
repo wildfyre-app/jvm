@@ -42,6 +42,13 @@ tasks.withType(FindBugs) {
     }
 }
 
+// Removes the directories out/ (created by IntelliJ) and wildfyre.net/ (created by the maven plugin) when calling
+// 'gradle clean'.
+clean {
+    delete "${rootDir}/out"
+    delete "${rootDir}/wildfyre.net"
+}
+
 // Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
 // Needed for publishing
 task javadocJar(type: Jar) {
