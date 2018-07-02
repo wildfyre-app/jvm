@@ -24,7 +24,7 @@
         "java": {
             "type": "script-and-regex",
             "include": "(build.gradle)",
-            "script-and-regex.script": "./gradlew --quiet build test check javadoc #",
+            "script-and-regex.script": "./gradlew --quiet build test check #",
             "script-and-regex.regex": "/^(?P<message>(?!--.*).*): warning (?P<warning>.*warning.*)$/m"
         }
     }

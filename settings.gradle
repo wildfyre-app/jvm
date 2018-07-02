@@ -2,4 +2,3 @@ rootProject.name = 'wflib-java'
 include 'main'
 include 'http'
 findProject(':http')?.name = 'wflib-java-http'
-

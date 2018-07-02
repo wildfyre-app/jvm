@@ -50,6 +50,8 @@ hs_err_pid*
 
 # IntelliJ
 /out/
+# Modules
+*/out/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
@@ -94,6 +96,8 @@ Temporary Items
 # From https://github.com/github/gitignore/blob/master/Gradle.gitignore
 .gradle
 /build/
+# Modules
+*/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting

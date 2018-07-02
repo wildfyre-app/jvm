@@ -21,6 +21,13 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 public class MainTest {
+
+	@Test
+	public void testMax(){
+		assertEquals(6, Main.max(5, 6));
+		assertEquals(7, Main.max(7, 6));
+	}
+
     @Test
     public void test(){
         assertTrue(true);
