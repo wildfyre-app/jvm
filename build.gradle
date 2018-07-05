@@ -32,7 +32,10 @@ dependencies {
 }
 
 javadoc {
-    options.addBooleanOption('html5', true)
+    options {
+        addStringOption('source', '8')
+        //addBooleanOption('html5', true) Only in Java 9+, breaks in Java 8
+    }
 }
 
 tasks.withType(FindBugs) {
