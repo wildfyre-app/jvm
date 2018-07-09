@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import static com.eclipsesource.json.WriterConfig.PRETTY_PRINT;
 import static net.wildfyre.http.Method.POST;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class RequestTest {
 
@@ -17,7 +17,7 @@ public class RequestTest {
 				.add("username", "libtester")
 				.add("password", "thisisnotatest"));
 
-			System.out.println(j.toString(PRETTY_PRINT));
+            assertNotNull(j.asObject().getString("token", null));
 		} catch (Request.CantConnectException e) {
 			throw new IllegalArgumentException(e);
 		} catch (IssueInTransferException e) {
@@ -27,5 +27,11 @@ public class RequestTest {
 				fail("Unknown issue in transfer.");
 		}
 	}
+
+	@Test
+	public void testAvailabilityOfDatabase(){
+	    assertNotEquals("default", System.getProperty("org.gradle.test.worker", "default"));
+        assertTrue(Request.isTesting);
+    }
 
 }

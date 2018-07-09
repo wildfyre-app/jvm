@@ -15,10 +15,12 @@ import java.net.URL;
  */
 public class Request {
 
+    //region Select the URL of the server depending on the building environment
 	private static final String API_URL = "https://api.wildfyre.net";
 	private static final String API_URL_TESTING = "http://localhost:8000";
-	private static boolean isTesting = true;
-	private static String getURL(){return isTesting ? API_URL_TESTING : API_URL;}
+	static final boolean isTesting = !System.getProperty("org.gradle.test.worker", "default").equals("default");
+	static String getURL(){return isTesting ? API_URL_TESTING : API_URL;}
+    //endregion
 
 	public static final String CHARSET = "UTF-8";
 
