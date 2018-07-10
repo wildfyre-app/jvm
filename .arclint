@@ -1,5 +1,5 @@
 {
-    "exclude": ["(libs/)"],
+    "exclude": ["(libs/|wrapper/|gradlew)"],
     "linters": {
         "filename": {
             "type": "filename"
@@ -17,15 +17,20 @@
             "type": "merge-conflict"
         },
 
+        "text": {
+            "type": "text",
+            "text.max-line-length": 80
+        },
+
         "chmod": {
             "type": "chmod"
         },
 
         "java": {
-            "type": "script-and-regex",
-            "include": "(build.gradle)",
-            "script-and-regex.script": "./gradlew --quiet build test check #",
-            "script-and-regex.regex": "/^(?P<message>(?!--.*).*): warning (?P<warning>.*warning.*)$/m"
+             "type": "script-and-regex",
+             "include": "(src|build.gradle|linter.sh)",
+             "script-and-regex.script": "./linter.sh",
+             "script-and-regex.regex": "/^(?P<message>.*)$/m"
         }
     }
 }
