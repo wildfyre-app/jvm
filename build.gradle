@@ -30,6 +30,8 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile project(':wflib-java-http')
+    compile project(':wflib-java-cache')
 }
 
 javadoc {
@@ -59,6 +61,8 @@ findbugsTest {
 clean {
     delete "${rootDir}/out"
     delete "${rootDir}/wildfyre.net"
+    delete "${rootDir}/http/out"
+    delete "${rootDir}/cache/out"
 }
 
 // Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
