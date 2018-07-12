@@ -80,7 +80,7 @@ echo $CURRENT > $FILE
 # That's not *perfect*, but that's reliable and is good enough that it
 # won't cause any problems.
 if [ $CURRENT -ge $LIMIT ]; then
-    ./gradlew clean clean test check 2>/dev/null | grep --color=always FAILED
+    ./gradlew clean test build javadoc check 2>/dev/null | grep --color=always FAILED
 # else ignore the call because this script was already called in the last
 # seconds
 fi

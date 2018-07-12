@@ -39,7 +39,7 @@ public class Request {
      * @param params  the parameters you provide
      * @return The JSON response from the server.
      */
-    protected static JsonValue request(Method method, String token, String address, JsonObject params)
+    public static JsonValue request(Method method, String token, String address, JsonObject params)
         throws CantConnectException, IssueInTransferException {
         try {
 
@@ -188,4 +188,5 @@ public class Request {
     }
 
     //endregion
+
 }
