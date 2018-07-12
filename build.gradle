@@ -21,7 +21,7 @@ void getVersion(){
     version stdout
         .toString()[1..-2]                      // Remove the \n character at the end of the command and the 'v'
         .replaceFirst("-\\d+-", "-")            // Remove the number of commits
-    println "-- Detected project version: " + version
+    println "Detected project version: " + version
 }
 
 repositories {
