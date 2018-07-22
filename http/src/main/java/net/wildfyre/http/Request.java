@@ -1,14 +1,15 @@
 package net.wildfyre.http;
 
 import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
+import com.eclipsesource.json.ParseException;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 /**
  * Wrapper around the HTTP requests.
@@ -28,44 +29,75 @@ public class Request {
     public static final String CHARSET = "UTF-8";
 
     //endregion
-    //region Requests
+    //region Object
+
+    final HttpURLConnection conn;
 
     /**
-     * Sends a request to the API.
-     *
-     * @param method  the HTTP method used by the request.
-     * @param token   the token used to authenticate the user (can be {@code null} for un-authenticated requests).
-     * @param address the address you want to query (eg. /account/)
-     * @param params  the parameters you provide
-     * @return The JSON response from the server.
+     * Creates a new request to the server, and starts to execute it.
+     * @param method the HTTP method required by the API
+     * @param address the address you'd like to access (see the API documentation)
+     * @throws CantConnectException if the connection to the server fails
      */
-    public static JsonValue request(Method method, String token, String address, JsonObject params)
-        throws CantConnectException, IssueInTransferException {
+    public Request(Method method, String address) throws CantConnectException {
         try {
-
-            // Creation of the URL
             URL url = new URL(getURL() + address);
-            byte[] postDataBytes = convertToByteArray(params);
 
-            // Connection
-            HttpURLConnection conn = connect(url);
+            conn = connect(url);
 
             setRequestedMethod(conn, method);
 
-            conn.setRequestProperty("Host", url.getHost());
-            if (token != null) conn.setRequestProperty("Authorization", "token " + token);
             conn.setRequestProperty("From", "lib-java");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("Content-Length", String.valueOf(postDataBytes.length));
-            conn.setDoOutput(true);
-            write(conn, postDataBytes);
+            conn.setRequestProperty("Host", url.getHost());
 
-            return read(getInputStream(conn));
+            // Default value, might be overridden later
+            conn.setRequestProperty("Accept", DataType.JSON.toString());
 
         } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("The provided address " + address + " at " + getURL() + " is malformed: "
+            throw new CantConnectException("The provided address " + address + " at " + getURL() + " is malformed: "
                 + getURL() + address, e);
         }
+    }
+
+    /**
+     * Makes the request authenticated by adding the token of the user.
+     * @param token the token
+     * @return This request itself, to allow method-chaining.
+     */
+    public Request addToken(String token) {
+        conn.setRequestProperty("Authorization", "token " + token);
+
+        return this;
+    }
+
+    /**
+     * Adds JSON parameters to this request.
+     * @param params the parameters
+     * @return This request itself, to allow method-chaining.
+     * @throws CantConnectException if the lib cannot connect to the server
+     */
+    public Request addJson(JsonValue params) throws CantConnectException {
+        try {
+            conn.setRequestProperty("Content-Type", DataType.JSON.toString());
+            conn.setDoOutput(true);
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            params.writeTo(bw);
+            bw.close();
+
+            return this;
+
+        } catch (IOException e) {
+            throw new CantConnectException("Cannot get output stream to the connection.", e);
+        }
+    }
+
+    /**
+     * Accesses the JSON response from the server.
+     * @return The JSON response from the server.
+     * @throws IssueInTransferException if there is problem with the connection or the data
+     */
+    public JsonValue get() throws IssueInTransferException {
+        return read(getInputStream(conn));
     }
 
     //endregion
@@ -111,25 +143,10 @@ public class Request {
      */
     static void setRequestedMethod(HttpURLConnection connection, Method method) {
         try {
-            connection.setRequestMethod(method.toString());
+            connection.setRequestMethod(method.name());
 
         } catch (ProtocolException e) {
             throw new IllegalArgumentException("Cannot set the method to " + method, e);
-        }
-    }
-
-    /**
-     * Writes the bytes to the connection.
-     * @param connection the connection
-     * @param bytes the data that should be sent
-     * @throws CantConnectException if the output stream of the connection is unreachable for some reason
-     */
-    static void write(HttpURLConnection connection, byte[] bytes) throws CantConnectException {
-        try {
-            connection.getOutputStream().write(bytes);
-
-        } catch (IOException e) {
-            throw new CantConnectException("Cannot get output stream to the connection.", e);
         }
     }
 
@@ -172,6 +189,11 @@ public class Request {
         } catch (IOException e) {
             throw new IssueInTransferException("There was an I/O error while parsing the JSON data, or the server " +
                 "refused the request.", e);
+
+        } catch (ParseException e) {
+            String content = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
+            throw new RuntimeException("The content of the InputStream was not a JSON object:\n"
+                + content + "\nSize: " + content.length(), e);
         }
     }
 

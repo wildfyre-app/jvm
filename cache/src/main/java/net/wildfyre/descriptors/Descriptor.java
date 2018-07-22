@@ -29,6 +29,12 @@ public abstract class Descriptor {
     private static long timeBeforeRemoval = 1000*60*5;
 
     private long lastUsage;
+    private boolean isNew;
+
+    {   // Initializer that calls the method just before any new object gets created.
+        use();
+        isNew = true;
+    }
 
     /**
      * Set the time of validation of the cache.
@@ -48,6 +54,7 @@ public abstract class Descriptor {
      * @return {@code true} if this descriptor is valid.
      * @see #isValid() Shortcut without the currentTime parameter
      */
+    @SuppressWarnings("WeakerAccess")
     public boolean isValid(long currentTime){
         return currentTime - lastUsage < timeBeforeRemoval;
     }
@@ -57,8 +64,25 @@ public abstract class Descriptor {
      * @return {@code true} if this descriptor is valid.
      * @see #isValid(long) For large collections
      */
+    @SuppressWarnings("WeakerAccess")
     public final boolean isValid(){
         return isValid(System.currentTimeMillis());
+    }
+
+    /**
+     * Permits to know if this object was ever used before.
+     * <p>This method tracks whether {@link #use()} was ever called on this object (except by the initializer).</p>
+     * @return {@code true} if this object has already been used at least once.
+     */
+    public final boolean isNew(){
+        return isNew;
+    }
+
+    /**
+     * Marks this descriptors' last usage as now.
+     */
+    public final void use() {
+        lastUsage = System.currentTimeMillis(); isNew = false;
     }
 
     //endregion
@@ -66,43 +90,9 @@ public abstract class Descriptor {
 
     /**
      * Updates this Descriptor.
+     * <p>The update is always executed in the current thread.</p>
      */
     public abstract void update();
-
-    //endregion
-    //region References
-
-    /**
-     * This class represents a reference to a Descriptor in the cache.
-     *
-     * <p>This class is important because of how the cache is stored. This class stores the ID of the Descriptor it
-     * references, and not an actual pointer. This class then simulates being a pointer by searching for the ID in the
-     * cache. The reason this is important is for the case where the object was deleted. In pure Java, the garbage
-     * collector will not remove objects as long as any references to them exists. Since this class does not count as a
-     * reference (it holds the ID, not the object), the Descriptor is only referenced by the cache -- which means that
-     * when the cache decides to remove it, it is actually deleted. In that case, this class will throw an exception
-     * when the user tries to recover the object.</p>
-     *
-     * @param <T> The type of the Descriptor referenced by this object.
-     */
-    public abstract static class Reference<T extends Descriptor> {
-
-        /**
-         * Gets the Descriptor referenced by this object.
-         * @return The Descriptor referenced by this object.
-         * @throws NoSuchFieldException if the object does not exist.
-         */
-        public abstract T get() throws NoSuchFieldException;
-
-        /**
-         * Updates the Descriptor referenced by this object.
-         * @throws NoSuchFieldException if the object does not exist.
-         */
-        public final void update() throws NoSuchFieldException {
-            get().update();
-        }
-
-    }
 
     //endregion
 

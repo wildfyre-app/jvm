@@ -19,7 +19,7 @@
 
         "text": {
             "type": "text",
-            "text.max-line-length": 80
+            "text.max-line-length": 120
         },
 
         "chmod": {

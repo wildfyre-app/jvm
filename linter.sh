@@ -24,7 +24,7 @@
 #    bytecode).
 
 # How many seconds happen between two different lintings
-INVALIDATE_AFTER=15
+INVALIDATE_AFTER=60
 
 # I am aware that this is bad and is a great loss of performance.
 # This is the only way I found to wait until the Gradle daemon is ready.

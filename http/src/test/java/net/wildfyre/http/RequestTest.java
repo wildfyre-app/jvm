@@ -9,17 +9,23 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
 import static com.eclipsesource.json.WriterConfig.PRETTY_PRINT;
+import static net.wildfyre.http.Method.GET;
 import static net.wildfyre.http.Method.POST;
 import static org.junit.Assert.*;
 
 public class RequestTest {
 
+    static final String token = "9d36a784f7bc641b9d0f7a000a96b6563b987956";
+
     @Test
-    public void request(){
+    public void connect(){
         try {
-            JsonValue j = Request.request(POST, null, "/account/auth/", new JsonObject()
-                .add("username", "libtester")
-                .add("password", "thisisnotatest"));
+
+            JsonValue j = new Request(POST, "/account/auth/")
+                .addJson(new JsonObject()
+                    .add("username", "libtester")
+                    .add("password", "thisisnotatest"))
+                .get();
 
             assertNotNull(j.asObject().getString("token", null));
         } catch (Request.CantConnectException e) {
@@ -29,6 +35,25 @@ public class RequestTest {
                 fail("Issue in transfer: " + e.getJson().get().toString(PRETTY_PRINT));
             else
                 fail("Unknown issue in transfer.");
+        }
+    }
+
+    @Test
+    public void getOwnPage(){
+        try {
+            JsonObject j = new Request(GET, "/users/")
+                .addToken(token)
+                .get()
+                .asObject();
+
+            assertNotEquals(-1, j.getInt("user", -1));
+            assertEquals("libtester", j.getString("name", "not found"));
+            assertNotNull(j.getString("avatar", null));
+            assertNotNull(j.getString("bio", null));
+            assertFalse(j.getBoolean("banned", true));
+
+        } catch (Request.CantConnectException | IssueInTransferException e) {
+            throw new RuntimeException(e);
         }
     }
 
