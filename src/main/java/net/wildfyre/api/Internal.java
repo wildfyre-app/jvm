@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package net.wildfyre.descriptors;
+package net.wildfyre.api;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import net.wildfyre.descriptors.Descriptor;
+import net.wildfyre.users.LoggedUser;
+import net.wildfyre.users.User;
 import net.wildfyre.http.IssueInTransferException;
 import net.wildfyre.http.Request;
 

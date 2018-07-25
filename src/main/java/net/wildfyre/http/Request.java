@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 Wildfyre.net
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package net.wildfyre.http;
 
 import com.eclipsesource.json.Json;
@@ -16,6 +32,7 @@ import java.util.stream.Collectors;
  * <p>
  * This class is NOT part of the public API.
  */
+@SuppressWarnings("WeakerAccess") // This full class is API
 public class Request {
 
     //region Select the URL of the server depending on the building environment
@@ -80,7 +97,7 @@ public class Request {
         try {
             conn.setRequestProperty("Content-Type", DataType.JSON.toString());
             conn.setDoOutput(true);
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream(), CHARSET));
             params.writeTo(bw);
             bw.close();
 
@@ -174,11 +191,9 @@ public class Request {
     static JsonValue read(InputStream input) throws IssueInTransferException {
         try {
             return Json.parse (
-                new BufferedReader (
-                    new InputStreamReader (
-                        input,
-                        Request.CHARSET
-                    )
+                new InputStreamReader (
+                    input,
+                    Request.CHARSET
                 )
             );
 
@@ -191,9 +206,16 @@ public class Request {
                 "refused the request.", e);
 
         } catch (ParseException e) {
-            String content = new BufferedReader(new InputStreamReader(input)).lines().collect(Collectors.joining("\n"));
-            throw new RuntimeException("The content of the InputStream was not a JSON object:\n"
-                + content + "\nSize: " + content.length(), e);
+            try {
+                String content = new BufferedReader(new InputStreamReader(input, CHARSET))
+                    .lines()
+                    .collect(Collectors.joining("\n"));
+                throw new RuntimeException("The content of the InputStream was not a JSON object:\n"
+                    + content + "\nSize: " + content.length(), e);
+
+            } catch (UnsupportedEncodingException e1) {
+                throw new RuntimeException("This should never happen: Request.CHARSET is wrong.", e1);
+            }
         }
     }
 

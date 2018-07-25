@@ -14,11 +14,13 @@
  * limitations under the License.
  */
 
-package net.wildfyre.descriptors;
+package net.wildfyre.users;
 
 import com.eclipsesource.json.JsonObject;
+import net.wildfyre.api.Internal;
 import net.wildfyre.http.IssueInTransferException;
 import net.wildfyre.http.Request;
+import net.wildfyre.descriptors.Descriptor;
 
 import java.net.MalformedURLException;
 import java.net.URL;

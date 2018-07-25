@@ -1,7 +1,6 @@
 package net.wildfyre.api;
 
-import net.wildfyre.descriptors.Internal;
-import net.wildfyre.descriptors.LoggedUser;
+import net.wildfyre.users.LoggedUser;
 import net.wildfyre.http.Request;
 
 /**

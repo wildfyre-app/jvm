@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package net.wildfyre.descriptors;
+package net.wildfyre.users;
 
+import net.wildfyre.api.Internal;
 import net.wildfyre.http.Request;
 import org.junit.Before;
 import org.junit.Test;

@@ -30,8 +30,7 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
-    compile project(':wflib-java-http')
-    compile project(':wflib-java-cache')
+    implementation group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
 }
 
 javadoc {
@@ -43,8 +42,8 @@ javadoc {
 
 tasks.withType(FindBugs) {
     reports {
-        xml.enabled = true
-        html.enabled = false
+        xml.enabled = false
+        html.enabled = true
     }
 }
 
