@@ -1,13 +1,18 @@
-# Installation
+# WildFyre Java API
+
+[![Maven Central](https://bit.ly/2AiQT95)](https://bit.ly/2K1PTG4)
+
+## Installation
 
 To install this library for testing..., clone it and ensure you have Java installed (at least version 1.8).
 
 You can check your Java version by running:
-		$ java -version
+
+    $ java -version
 
 To use this library as a dependency, you WILL BE able to import it from MavenCentral in the future.
 
-# Testing...
+## Testing...
 
 Here is the list of commands you can use to check the code (you can replace `./gradlew` by `gradlew.bat` on Windows):
 
