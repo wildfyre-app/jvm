@@ -1,5 +1,6 @@
 # WildFyre Java API
 
+[![Javadocs](https://bit.ly/2vxyIa5)](https://bit.ly/2OBImBj)
 [![Maven Central](https://bit.ly/2AiQT95)](https://bit.ly/2K1PTG4)
 
 ## Installation
