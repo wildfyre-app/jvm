@@ -33,10 +33,10 @@ class RequestTest {
         try {
 
             val j = Request(POST, "/account/auth/")
-                    .addJson(JsonObject()
-                            .add("username", "libtester")
-                            .add("password", "thisisnotatest"))
-                    .get()
+                .addJson(JsonObject()
+                    .add("username", "libtester")
+                    .add("password", "thisisnotatest"))
+                .getJson()
 
             assertNotNull(j.asObject().getString("token", null))
         } catch (e: Request.CantConnectException) {
@@ -54,9 +54,9 @@ class RequestTest {
     fun getOwnPage() {
         try {
             val j = Request(GET, "/users/")
-                    .addToken(token)
-                    .get()
-                    .asObject()
+                .addToken(token)
+                .getJson()
+                .asObject()
 
             assertNotEquals(-1, j.getInt("user", -1).toLong())
             assertEquals("libtester", j.getString("name", "not found"))
@@ -83,7 +83,7 @@ class RequestTest {
 
         assertNotNull(input)
         try {
-            val json = Request.read(input!!)
+            val json = Request.readJson(input!!)
 
             assertEquals(JsonObject().add("data", 2), json)
         } catch (e: IssueInTransferException) {
