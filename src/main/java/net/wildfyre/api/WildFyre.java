@@ -1,12 +1,13 @@
 package net.wildfyre.api;
 
-import net.wildfyre.users.LoggedUser;
 import net.wildfyre.http.Request;
+import net.wildfyre.users.LoggedUser;
+import net.wildfyre.users.Users;
+import net.wildfyre.utils.InvalidCredentialsException;
 
 /**
  * The primary means of interaction with the API.
  */
-@SuppressWarnings({"unused", "WeakerAccess"}) // it's an API, so of course some stuff is unused/can be private
 public class WildFyre {
 
     /**
@@ -15,13 +16,14 @@ public class WildFyre {
      * anyway.
      * @param username the user's username
      * @param password the user's password
-     * @return Your own user. See also {@link WildFyre#getMe()}.
+     * @return Your own user. See also {@link Users#me()}.
      */
-    public static LoggedUser connect(String username, String password) throws Request.CantConnectException {
+    public static LoggedUser connect(String username, String password)
+    throws Request.CantConnectException, InvalidCredentialsException {
         Internal.requestToken(username, password);
         Internal.init();
 
-        return Internal.getMe();
+        return Users.me();
     }
 
     /**
@@ -29,7 +31,7 @@ public class WildFyre {
      * This method is NOT executed concurrently, because no action can be taken by the client while the cache is empty
      * anyway.
      * @param token the token
-     * @return Your own user. See also {@link WildFyre#getMe()}.
+     * @return Your own user. See also {@link Users#me()}.
      */
     public static LoggedUser connect(String token) throws Request.CantConnectException {
         if(token == null)
@@ -38,7 +40,7 @@ public class WildFyre {
         Internal.setToken(token);
         Internal.init();
 
-        return Internal.getMe();
+        return Users.me();
     }
 
     /**
@@ -46,14 +48,6 @@ public class WildFyre {
      */
     public static void disconnect(){
         Internal.reset();
-    }
-
-    /**
-     * Returns the logged-in user of the API, that is, the user corresponding to the saved-token.
-     * @return The logged-in user.
-     */
-    public static LoggedUser getMe(){
-        return Internal.getMe();
     }
 
     /**
@@ -65,6 +59,6 @@ public class WildFyre {
      * @return {@code true} if the user is registered.
      */
     public static boolean isConnected(){
-        return Internal.getToken() != null;
+        return Internal.token() != null;
     }
 }

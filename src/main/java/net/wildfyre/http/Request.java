@@ -32,7 +32,6 @@ import java.util.stream.Collectors;
  * <p>
  * This class is NOT part of the public API.
  */
-@SuppressWarnings("WeakerAccess") // This full class is API
 public class Request {
 
     //region Select the URL of the server depending on the building environment

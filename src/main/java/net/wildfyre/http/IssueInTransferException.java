@@ -16,10 +16,8 @@
 
 package net.wildfyre.http;
 
-import com.eclipsesource.json.Json;
-import com.eclipsesource.json.JsonObject;
-import com.eclipsesource.json.JsonValue;
-import com.eclipsesource.json.ParseException;
+import com.eclipsesource.json.*;
+import net.wildfyre.descriptors.NoSuchEntityException;
 
 import java.io.*;
 import java.util.Optional;
@@ -27,7 +25,6 @@ import java.util.Optional;
 /**
  * Signifies that the server refused the data. More information about the problem can be found using {@link #getJson()}.
  */
-@SuppressWarnings("WeakerAccess") // Part of the API
 public class IssueInTransferException extends IOException {
     private JsonValue json;
 
@@ -42,7 +39,7 @@ public class IssueInTransferException extends IOException {
         String out = "";
         try {
 
-            Reader input = new BufferedReader(new InputStreamReader(in, "UTF-8"));
+            Reader input = new BufferedReader(new InputStreamReader(in, Request.CHARSET));
             StringBuilder output = new StringBuilder();
 
             for (int c; (c = input.read()) >= 0; ) {
@@ -77,5 +74,56 @@ public class IssueInTransferException extends IOException {
      */
     public Optional<JsonValue> getJson(){
         return Optional.ofNullable(json);
+    }
+
+    //region Details analyzer
+
+    /**
+     * Performs an action for some details of this exception.
+     *
+     * @param detail the message expected to be in the 'details' field of the JSON data
+     * @param action what to do if the message matches
+     * @throws NoSuchEntityException if the action throws a NoSuchEntityException, it is relayed to the caller
+     * @see #ifDetailsAre(String, ExceptionRunnable, ExceptionRunnable) Do something on a failure
+     */
+    public void ifDetailsAre(String detail, ExceptionRunnable action) throws NoSuchEntityException {
+        ifDetailsAre(detail, action, null);
+    }
+
+    /**
+     * Performs an action for some details of this exception.
+     *
+     * @param detail the message expected to be in the 'details' field of the JSON data
+     * @param action what to do if the message matches
+     * @param otherwiseDo what to do if the message doesn't match
+     * @throws NoSuchEntityException if any action throws a NoSuchEntityException, it is relayed to the caller
+     * @see #ifDetailsAre(String, ExceptionRunnable) Do nothing on a failure
+     */
+    public void ifDetailsAre(String detail, ExceptionRunnable action, ExceptionRunnable otherwiseDo)
+    throws NoSuchEntityException {
+        if(json != null)
+            if(json.asObject().getString("detail", null).equals(detail))
+                action.run();
+            else if(otherwiseDo != null)
+                otherwiseDo.run();
+    }
+
+    /**
+     * An action that may throw a {@link NoSuchEntityException}.
+     */
+    public interface ExceptionRunnable {
+
+        /**
+         * The action of this object.
+         * @throws NoSuchEntityException If there's a missing entity at some point.
+         */
+        void run() throws NoSuchEntityException;
+    }
+
+    //endregion
+
+    @Override
+    public String getMessage(){
+        return json != null ? super.getMessage() + "\n" + json.toString(WriterConfig.PRETTY_PRINT) : super.getMessage();
     }
 }

@@ -17,30 +17,27 @@
 package net.wildfyre.users;
 
 import net.wildfyre.api.Internal;
+import net.wildfyre.api.WildFyre;
 import net.wildfyre.http.Request;
+import net.wildfyre.http.RequestTest;
+import net.wildfyre.utils.InvalidCredentialsException;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import static junit.framework.TestCase.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class UserTest {
 
-    private static final String token = "9d36a784f7bc641b9d0f7a000a96b6563b987956";
-
     @Before
     public void before() throws Request.CantConnectException {
-        Internal.setToken(token);
+        Internal.setToken(RequestTest.token);
         Internal.init();
     }
 
     @Test
     public void createTest() {
-        int id = Internal.getMyId();
+        int id = Users.myID().orElseThrow(RuntimeException::new);
         User me = User.create(id);
         assertTrue(me.toString(), me instanceof LoggedUser);
         assertTrue(me.toString(), me.canEdit());
@@ -52,13 +49,36 @@ public class UserTest {
     }
 
     @Test(timeout = 1000L)
-    public void query() throws MalformedURLException {
-        User me = User.query(Internal.getMyId());
+    public void query() {
+        User me = Users.me();
 
-        assertEquals("libtester", me.getName());
-        assertEquals(3, me.getID());
-        assertEquals("http://localhost:8000/media/avatar/3.png", me.getAvatar());
-        assertEquals(new URL("http://localhost:8000/media/avatar/3.png"), me.getAvatarUrl());
-        assertEquals("This is libtester's bio.", me.getBio());
+        assertEquals("user", me.name());
+        assertEquals(2, me.getID());
+        assertFalse(me.avatar().isPresent());
+        assertEquals("", me.bio());
+    }
+
+    @Test(timeout = 1000L)
+    public void testNonExistingUser() {
+        Internal.setNoSuchEntityHandler(e -> {
+            throw new RuntimeException("An exception was thrown.", e);
+        });
+
+        assertFalse(Users.get(20051561).isPresent());
+    }
+
+    @Test
+    public void testWrongCredentials(){
+        WildFyre.disconnect();
+        try {
+            WildFyre.connect("wrong", "password");
+            fail();
+
+        } catch (Request.CantConnectException e) {
+            throw new RuntimeException(e);
+
+        } catch (InvalidCredentialsException e) {
+            assertTrue(true);
+        }
     }
 }

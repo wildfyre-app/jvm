@@ -16,6 +16,8 @@
 
 package net.wildfyre.descriptors;
 
+import net.wildfyre.http.Request;
+
 /**
  * Descriptors represent the raw data from the server, and are used by the internal cache.
  *
@@ -24,9 +26,6 @@ package net.wildfyre.descriptors;
 public abstract class Descriptor {
 
     //region Data validation
-
-    /** The time during which the cache is kept, in milliseconds. Default value: 5 min. */
-    private static long timeBeforeRemoval = 1000*60*5;
 
     private long lastUsage;
     private boolean isNew;
@@ -37,26 +36,13 @@ public abstract class Descriptor {
     }
 
     /**
-     * Set the time of validation of the cache.
-     * @param timeBeforeRemoval the time of validation, in milliseconds.
-     */
-    public static void setTimeBeforeRemoval(long timeBeforeRemoval){
-        if(timeBeforeRemoval <= 0)
-            throw new IllegalArgumentException("The parameter timeBeforeRemoval cannot be less than 0: "
-                + timeBeforeRemoval);
-
-        Descriptor.timeBeforeRemoval = timeBeforeRemoval;
-    }
-
-    /**
      * Checks if this descriptor is still valid.
      * @param currentTime the current time in milliseconds, as provided by {@link System#currentTimeMillis()}.
      * @return {@code true} if this descriptor is valid.
      * @see #isValid() Shortcut without the currentTime parameter
      */
-    @SuppressWarnings("WeakerAccess")
     public boolean isValid(long currentTime){
-        return currentTime - lastUsage < timeBeforeRemoval;
+        return currentTime - lastUsage < cacheManager().objectsExpireAfter();
     }
 
     /**
@@ -64,7 +50,6 @@ public abstract class Descriptor {
      * @return {@code true} if this descriptor is valid.
      * @see #isValid(long) For large collections
      */
-    @SuppressWarnings("WeakerAccess")
     public final boolean isValid(){
         return isValid(System.currentTimeMillis());
     }
@@ -85,6 +70,12 @@ public abstract class Descriptor {
         lastUsage = System.currentTimeMillis(); isNew = false;
     }
 
+    /**
+     * The Cache Manager that handles this object.
+     * @return This object.
+     */
+    public abstract CacheManager cacheManager();
+
     //endregion
     //region Updating
 
@@ -92,7 +83,7 @@ public abstract class Descriptor {
      * Updates this Descriptor.
      * <p>The update is always executed in the current thread.</p>
      */
-    public abstract void update();
+    public abstract void update() throws NoSuchEntityException, Request.CantConnectException;
 
     //endregion
 

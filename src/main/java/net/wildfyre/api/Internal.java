@@ -18,19 +18,18 @@ package net.wildfyre.api;
 
 import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.WriterConfig;
+import net.wildfyre.areas.Areas;
 import net.wildfyre.descriptors.Descriptor;
-import net.wildfyre.users.LoggedUser;
-import net.wildfyre.users.User;
+import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.IssueInTransferException;
 import net.wildfyre.http.Request;
+import net.wildfyre.users.Users;
+import net.wildfyre.utils.InvalidCredentialsException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
 
-import static net.wildfyre.http.Method.GET;
 import static net.wildfyre.http.Method.POST;
 
 /**
@@ -39,21 +38,19 @@ import static net.wildfyre.http.Method.POST;
  * <p>Note that you should call {@link #init()} after any modification of the token, otherwise the behavior of this
  * class is not defined.</p>
  */
-@SuppressWarnings({"unused", "WeakerAccess"}) // it's an API, so of course some stuff is unused/can be private
 public class Internal {
 
     private static String token;
-    private static int userId = -1;
 
     //region Cache content
-    private static Map<Integer, User> users = new HashMap<>();
 
     /**
      * Fully clears the cache, but keeps the token.
      * @see #clean() Only remove the data that has expired
      */
     public static void clear(){
-        users.clear();
+        Users.clear();
+        Areas.clear();
     }
 
     /**
@@ -62,9 +59,8 @@ public class Internal {
      * @see #clear() Remove all data, not only the expired data
      */
     public static void clean(){
-        long currentTime = System.currentTimeMillis();
-
-        users.values().removeIf(u -> !u.isValid(currentTime));
+        Users.clean();
+        Areas.clean();
     }
 
     /**
@@ -74,57 +70,18 @@ public class Internal {
     public static void reset(){
         clear();
         token = null;
-        userId = -1;
+        Users.reset();
+        // No need to reset Areas, as they are already cleared by the Internal#clear() call above.
     }
 
     //endregion
     //region Getters
 
     /**
-     * Gets the <u>cached version</u> of a user. Note that this will NEVER query the server, no matter what happens. You
-     * should probably user {@link User#query(int)} instead.
-     * @param id the user's ID
-     * @return The user found for the specified ID in the cache, or the default value.
-     */
-    public static Optional<User> getCachedUser(int id){
-        return Optional.ofNullable(users.get(id));
-    }
-
-    /**
-     * Gets the current user, that is, the user that corresponds to the saved token.
-     * @return The current user.
-     */
-    public static LoggedUser getMe(){
-        return User.query(getMyId()).asLogged();
-    }
-
-    /**
-     * Checks whether a user ID is the ID of the current user.
-     * @return {@code true} if the provided ID is the ID of the logged-in user.
-     */
-    public static boolean isMyId(int id){
-        if(userId == -1)
-            throw new IllegalStateException("Cannot call this method without specifying an ID. Call Internal#init.");
-
-        return userId == id;
-    }
-
-    /**
-     * The ID of the logged-in user.
-     * @return The ID of the logged-in user.
-     */
-    public static int getMyId(){
-        if(userId == -1)
-            throw new IllegalStateException("Cannot call this method without specifying an ID. Call Internal#init.");
-
-        return userId;
-    }
-
-    /**
      * Returns the token used for authentication.
      * @return The token.
      */
-    public static String getToken(){
+    public static String token(){
         return token;
     }
 
@@ -139,6 +96,71 @@ public class Internal {
      */
     static ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newCachedThreadPool();
 
+    //region NoSuchEntityException
+
+    private static Consumer<NoSuchEntityException> noSuchEntityHandler;
+
+    static void throwNoSuchEntity(NoSuchEntityException e){
+        if(noSuchEntityHandler != null)
+            noSuchEntityHandler.accept(e);
+        else throw new RuntimeException("Warning: no handler was specified for NoSuchEntityException, but one was" +
+            "needed. See Internal.setNoSuchEntityHandler().", e);
+    }
+
+    /**
+     * Registers a handler for the case where an Entity that was queried for update does not exist.
+     * @param consumer the handler.
+     */
+    public static void setNoSuchEntityHandler(Consumer<NoSuchEntityException> consumer){
+        if(noSuchEntityHandler != null) {
+            System.err.println("Warning: Internal.setNoSuchEntityHandler() was called a second time. The elder consumer"
+                + " will be kept.");
+            return;
+        }
+
+        if(consumer == null)
+            throw new NullPointerException("The consumer cannot be null.");
+
+        noSuchEntityHandler = consumer;
+    }
+
+    //endregion
+    //region CantConnectException
+
+    private static Consumer<Request.CantConnectException> cantConnectHandler;
+
+    /**
+     * Call this method if you need to tell the client of this API that the server is unreachable at the moment, if you
+     * are in a concurrent context.
+     * @param e the exception that was thrown during the request.
+     */
+    public static void throwCantConnect(Request.CantConnectException e){
+        if(cantConnectHandler != null)
+            cantConnectHandler.accept(e);
+        else throw new RuntimeException("Warning: no handler was specified for CantConnectException, but one was" +
+            "needed. See Internal.setCantConnectHandler().", e);
+    }
+
+    /**
+     * Registers a handler for the case where the API cannot connect to the server.
+     * @param consumer the handler.
+     */
+    public static void setCantConnectHandler(Consumer<Request.CantConnectException> consumer){
+        if(cantConnectHandler != null) {
+            System.err.println("Warning: Internal.setCantConnectHandler() was called a second time. The elder consumer"
+                + " will be kept.");
+            return;
+        }
+
+        if(consumer == null)
+            throw new NullPointerException("The consumer cannot be null.");
+
+        cantConnectHandler = consumer;
+    }
+
+    //endregion
+    //region Submit
+
     /**
      * Submits a new task to be executed concurrently.
      * @param task the task to be executed concurrently.
@@ -147,6 +169,23 @@ public class Internal {
         executor.submit(task);
     }
 
+    /**
+     * Submits a new task to be executed concurrently, that updates a Descriptor.
+     * @param descriptor the descriptor to be updated concurrently.
+     */
+    public static <D extends Descriptor> void submitUpdate(D descriptor) {
+        executor.submit(() -> {
+            try {
+                descriptor.update();
+            } catch (NoSuchEntityException e) {
+                throwNoSuchEntity(e);
+            } catch (Request.CantConnectException e) {
+                throwCantConnect(e);
+            }
+        });
+    }
+
+    //endregion
     //endregion
     //region Authentication
 
@@ -157,9 +196,8 @@ public class Internal {
      * @param password the user's password
      * @throws Request.CantConnectException if the API cannot connect to the server
      */
-    public static void requestToken(String username, String password) throws Request.CantConnectException {
-//TODO: Throw an exception 'InvalidCredentialsException extends IllegalArgumentException' if the password is incorrect
-
+    public static void requestToken(String username, String password)
+    throws Request.CantConnectException, InvalidCredentialsException {
         try {
             JsonObject json = new Request(POST, "/account/auth/")
                 .addJson(new JsonObject()
@@ -176,12 +214,21 @@ public class Internal {
             Internal.clear();
 
         } catch (IssueInTransferException e) {
-            throw new IllegalArgumentException("Cannot login to the desired user.", e);
+            if(e.getJson()
+                .orElseThrow(RuntimeException::new)
+                .asObject()
+                .get("non_field_errors")
+                .asArray()
+                .get(0)
+                .asString()
+                .equals("Unable to log in with provided credentials."))
+                throw new InvalidCredentialsException("Unable to log in with provided credentials.", e);
         }
     }
 
     /**
-     * Sets the token used by the API. Note that no verification regarding the token's validity is done by this method.
+     * Sets the token used by the API. Note that no verification regarding the token's validity is done by this method,
+     * use with {@link #init()} for that purpose.
      * @param token the new token
      */
     public static void setToken(String token) {
@@ -200,22 +247,9 @@ public class Internal {
      * @throws Request.CantConnectException if the API cannot connect to the server
      */
     public static void init() throws Request.CantConnectException {
-        try {
-            JsonObject json = new Request(GET, "/users/")
-                .addToken(token)
-                .get()
-                .asObject();
-
-            userId = json.getInt("user", -1);
-            if(userId == -1)
-                throw new RuntimeException("Couldn't find the ID of the logged-in user!\n"
-                    + json.toString(WriterConfig.PRETTY_PRINT));
-
-            Internal.clear();
-
-        } catch (IssueInTransferException e) {
-            throw new IllegalStateException("Server denied the request.", e);
-        }
+        Internal.clear();
+        Users.init();
+        Areas.init();
     }
 
     //endregion
