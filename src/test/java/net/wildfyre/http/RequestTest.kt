@@ -47,7 +47,6 @@ class RequestTest {
             else
                 fail("Unknown issue in transfer.")
         }
-
     }
 
     @Test
