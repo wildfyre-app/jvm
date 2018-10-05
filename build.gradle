@@ -38,6 +38,7 @@ dependencies {
 javadoc {
     options {
         addStringOption('source', '8')
+        addStringOption('link', "https://docs.oracle.com/javase/8/docs/api/")
         //addBooleanOption('html5', true) Only in Java 9+, breaks in Java 8
     }
 }

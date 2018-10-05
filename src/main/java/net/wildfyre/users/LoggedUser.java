@@ -18,8 +18,16 @@ package net.wildfyre.users;
 
 import com.eclipsesource.json.JsonObject;
 import net.wildfyre.api.Internal;
+import net.wildfyre.areas.Area;
+import net.wildfyre.areas.Areas;
+import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.IssueInTransferException;
 import net.wildfyre.http.Request;
+import net.wildfyre.posts.Post;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.wildfyre.http.Method.PATCH;
 
@@ -47,7 +55,6 @@ public class LoggedUser extends User {
      *
      * @param bio the new bio
      */
-    @SuppressWarnings("WeakerAccess")
     public void setBio(String bio){
         set(null, bio, null);
     }
@@ -60,7 +67,6 @@ public class LoggedUser extends User {
      *
      * @param username the new user's name
      */
-    @SuppressWarnings("WeakerAccess")
     public void setUsername(String username){
         set(username, null, null);
     }
@@ -73,7 +79,6 @@ public class LoggedUser extends User {
      *
      * @param avatar the new user's avatar
      */
-    @SuppressWarnings("WeakerAccess")
     public void setAvatar(String avatar){
         set(null, null, avatar);
     }
@@ -97,7 +102,6 @@ public class LoggedUser extends User {
      * @see #setBio(String) Set only the bio
      * @see #setUsername(String) Set only the username
      */
-    @SuppressWarnings("WeakerAccess")
     public void set(String username, String bio, String avatar){
         JsonObject json = new JsonObject();
 
@@ -122,17 +126,50 @@ public class LoggedUser extends User {
         Internal.submit(() -> { // Send query to server
             try {
                 new Request(PATCH, "/users/")
-                    .addToken(Internal.getToken())
+                    .addToken(Internal.token())
                     .addJson(json)
-                    .get();
+                    .getJson();
 
-            } catch (IssueInTransferException | Request.CantConnectException e) {
-                //TODO: Better exception-in-cache handling
-                throw new RuntimeException();
+                this.update();
+
+            } catch (IssueInTransferException e) {
+                throw new RuntimeException("Something unforeseen happened during the edition of the user.", e);
+
+            } catch (NoSuchEntityException e) {
+                throw new RuntimeException("Trying to edit a client that does not exist... this should not happen.", e);
+
+            } catch (Request.CantConnectException e) {
+                Internal.throwCantConnect(e);
             }
-
-            this.update();
         });
+    }
+
+    //endregion
+    //region Posts
+
+    /**
+     * Returns a Stream of every post created by the user in any Area.
+     *
+     * @return A Stream of the posts created by the user.
+     * @see Area#ownPosts() Get only the posts created in a specific Area.
+     * @see #postsList() This method as a List
+     */
+    public Stream<Post> posts(){
+        return Areas.stream()
+            .flatMap(Area::ownPosts);
+    }
+
+    /**
+     * Returns a list of the posts created by the user in any Area.
+     *
+     * <p>For performance reasons, we strongly recommend using {@link #posts()} to get a Stream, this method is provided
+     * for the case in which you really need a Collection.</p>
+     *
+     * @return The List of the posts created by this user.
+     * @see #posts() This method as a Stream, for better performances
+     */
+    public List<Post> postsList(){
+        return posts().collect(Collectors.toList());
     }
 
     //endregion

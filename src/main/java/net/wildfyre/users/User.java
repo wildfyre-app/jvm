@@ -17,14 +17,16 @@
 package net.wildfyre.users;
 
 import com.eclipsesource.json.JsonObject;
-import net.wildfyre.api.Internal;
+import net.wildfyre.descriptors.CacheManager;
+import net.wildfyre.descriptors.Descriptor;
+import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.IssueInTransferException;
 import net.wildfyre.http.Request;
-import net.wildfyre.descriptors.Descriptor;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Objects;
+import java.util.Optional;
 
 import static net.wildfyre.http.Method.GET;
 
@@ -50,15 +52,21 @@ public class User extends Descriptor {
     //region Updating
 
     @Override
-    public void update() {
+    public void update() throws NoSuchEntityException, Request.CantConnectException {
+        if(!Users.getCached(this.ID).isPresent()) {
+            System.err.println("The user " + ID + " is not even in the cache, aborting update early.");
+            return;
+        }
+
         try {
             JsonObject values = new Request(GET, "/users/" + ID + "/")
-                .get()
+                .getJson()
                 .asObject();
 
             // Use the old value as default value: if nothing is specified, keep the old value
             name =      values.getString("name", name);
-            avatar =    values.getString("avatar", avatar);
+            //TODO fix until T235
+            avatar =    values.get("avatar").isString() ? values.getString("avatar", avatar) : null;
             bio =       values.getString("bio", bio);
             isBanned =  values.getBoolean("banned", isBanned);
 
@@ -68,37 +76,13 @@ public class User extends Descriptor {
 
             this.use();
 
-        } catch (IssueInTransferException | Request.CantConnectException e) {
-            // TODO: Better exception handling
-            e.printStackTrace();
+        } catch (IssueInTransferException e) {
+            if(e.getJson().isPresent())
+                if(e.getJson().get().asObject().getString("detail", null).equals("Not found.")) {
+                    Users.users.remove(this.ID);
+                    throw new NoSuchEntityException("The requested user does not exist!", this);
+                }
         }
-    }
-
-    /**
-     * Retrieves a specific user by ID. Here are some details on how this method works:
-     * <p>If the user is NOT cached, the method stalls and queries the server. If the user is cached, the method returns
-     * the cached user immediately. If the user is cached but has expired, the method immediately returns the expired
-     * version and launches a refresh job that will be executed concurrently.</p>
-     * <p>You can know if the user you got is being refreshed or not by checking its {@link User#isValid()} method.</p>
-     * @param id the ID of the user
-     * @return The requested user.
-     */
-    public static User query(int id){
-        User user = Internal
-            .getCachedUser(id)
-            .orElseGet(() -> User.create(id));
-
-        // There is no user in the cache, stall & query server
-        if(user.isNew())
-            user.update(); // in this thread
-
-        // There is a user in the cache, but it's expired
-        if(!user.isValid())
-            Internal.submit(user::update); // in a new thread
-
-        user.use();
-
-        return user;
     }
 
     /**
@@ -107,7 +91,12 @@ public class User extends Descriptor {
      * @return A new User object.
      */
     static User create(int id){
-        return Internal.isMyId(id) ? new LoggedUser(id) : new User(id);
+        return Users.isMyID(id) ? new LoggedUser(id) : new User(id);
+    }
+
+    @Override
+    public CacheManager cacheManager() {
+        return Users.cacheManager();
     }
 
     //endregion
@@ -150,21 +139,24 @@ public class User extends Descriptor {
      * The avatar of this user: the raw URL written in a String object, as specified by the server.
      * @return The avatar of this user.
      */
-    public String getAvatar() {
+    public Optional<String> avatar() {
         this.use();
 
-        return avatar;
+        return Optional.ofNullable(avatar);
     }
 
     /**
      * The avatar of this user: a URL object is created and points to the location of the avatar picture.
      * @return The avatar of this user.
      */
-    public URL getAvatarUrl() {
+    public Optional<URL> avatarUrl() {
         this.use();
 
         try {
-            return new URL(avatar);
+            if(avatar != null)
+                return Optional.of(new URL(avatar));
+            else
+                return Optional.empty();
 
         } catch (MalformedURLException e) {
             throw new RuntimeException("Since URLs are sent by the server, they shouldn't be malformed...", e);
@@ -175,7 +167,7 @@ public class User extends Descriptor {
      * The bio of this user.
      * @return The bio of this user.
      */
-    public String getBio() {
+    public String bio() {
         this.use();
 
         return bio;
@@ -195,7 +187,7 @@ public class User extends Descriptor {
      * The name of this user.
      * @return The name of this user.
      */
-    public String getName() {
+    public String name() {
         this.use();
 
         return name;
@@ -206,14 +198,12 @@ public class User extends Descriptor {
 
     @Override // Generated by IntelliJ
     public String toString() {
-        final StringBuilder sb = new StringBuilder("User{");
-        sb.append("ID=").append(ID);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", avatar='").append(avatar).append('\'');
-        sb.append(", bio='").append(bio).append('\'');
-        sb.append(", isBanned=").append(isBanned);
-        sb.append('}');
-        return sb.toString();
+        return "User{" + "ID=" + ID +
+            ", name='" + name + '\'' +
+            ", avatar='" + avatar + '\'' +
+            ", bio='" + bio + '\'' +
+            ", isBanned=" + isBanned +
+            '}';
     }
 
     @Override

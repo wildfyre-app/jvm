@@ -18,8 +18,10 @@ package net.wildfyre.http
 
 import com.eclipsesource.json.JsonObject
 import com.eclipsesource.json.WriterConfig.PRETTY_PRINT
+import net.wildfyre.api.WildFyre
 import net.wildfyre.http.Method.GET
 import net.wildfyre.http.Method.POST
+import net.wildfyre.users.LoggedUser
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.ByteArrayInputStream
@@ -34,8 +36,8 @@ class RequestTest {
 
             val j = Request(POST, "/account/auth/")
                 .addJson(JsonObject()
-                    .add("username", "libtester")
-                    .add("password", "thisisnotatest"))
+                    .add("username", "user")
+                    .add("password", "password123"))
                 .getJson()
 
             assertNotNull(j.asObject().getString("token", null))
@@ -58,8 +60,7 @@ class RequestTest {
                 .asObject()
 
             assertNotEquals(-1, j.getInt("user", -1).toLong())
-            assertEquals("libtester", j.getString("name", "not found"))
-            assertNotNull(j.getString("avatar", null))
+            assertEquals("user", j.getString("name", "not found"))
             assertNotNull(j.getString("bio", null))
             assertFalse(j.getBoolean("banned", true))
 
@@ -98,8 +99,24 @@ class RequestTest {
     }
 
     companion object {
+        internal val token: String
 
-        internal val token = "9d36a784f7bc641b9d0f7a000a96b6563b987956"
+        init {
+            token = Request(POST, "/account/auth/")
+                .addJson(JsonObject()
+                    .add("username", "user")
+                    .add("password", "password123"))
+                .getJson().asObject()
+                .getString("token", null)
+        }
+
+        /**
+         * Connects to the test database. If the database is not running on this device, this will obviously fail.
+         * @return The logged user.
+         */
+        fun connectToTestDB(): LoggedUser {
+            return WildFyre.connect(token)
+        }
     }
 
 }

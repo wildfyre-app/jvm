@@ -61,6 +61,7 @@ constructor(private val method: Method, private val address: String) {
 
     private fun send() : HttpURLConnection {
         val conn = connect(requestUrl)
+        conn.doInput = true // We always want input
 
         setRequestedMethod(conn, method)
 
@@ -130,7 +131,7 @@ constructor(private val method: Method, private val address: String) {
      * @param token the token
      * @return This request itself, to allow method-chaining.
      */
-    fun addToken(token: String = Internal.getToken()): Request {
+    fun addToken(token: String = Internal.token()): Request {
         headers["Authorization"] = "token $token"
 
         return this
@@ -213,8 +214,8 @@ constructor(private val method: Method, private val address: String) {
         }
 
         /**
-         * Converts the JSON parameters to an array of bytes that can be sent in the request. The charset used is specified
-         * in [CHARSET] ({@value #CHARSET}).
+         * Converts the JSON parameters to an array of bytes that can be sent in the request. The charset used is
+         * specified in [CHARSET].
          *
          * @param params the JSON parameters to be converted.
          * @return A byte array representing the provided parameters.
@@ -224,8 +225,8 @@ constructor(private val method: Method, private val address: String) {
                 return params.toString().toByteArray(charset(CHARSET))
 
             } catch (e: UnsupportedEncodingException) {
-                throw RuntimeException("There was a problem with the character encoding '" + CHARSET + "'. Because it is" +
-                        "hard-written in the class, this error should never happen.", e)
+                throw RuntimeException("There was a problem with the character encoding '" + CHARSET + "'." +
+                    "Because it is hard-written in the class, this error should never happen.", e)
             }
 
         }
@@ -254,7 +255,6 @@ constructor(private val method: Method, private val address: String) {
         @Throws(IssueInTransferException::class)
         internal fun getInputStream(connection: HttpURLConnection): InputStream {
             try {
-                connection.doInput = true
                 return connection.inputStream
 
             } catch (e: IOException) {
@@ -280,10 +280,13 @@ constructor(private val method: Method, private val address: String) {
                 )
 
             } catch (e: UnsupportedEncodingException) {
-                throw RuntimeException("There was an encoding error. Since the encoding is hardcoded in Request.CHARSET," + "this error should never occur. Please report to the developers with the full stacktrace.", e)
+                throw RuntimeException("There was an encoding error. Since the encoding is hardcoded in " +
+                    "Request.CHARSET, this error should never occur. Please report to the developers with the full " +
+                    "stacktrace.", e)
 
             } catch (e: IOException) {
-                throw IssueInTransferException("There was an I/O error while parsing the JSON data, or the server " + "refused the request.", e)
+                throw IssueInTransferException("There was an I/O error while parsing the JSON data, or the server " +
+                    "refused the request.", e)
 
             } catch (e: ParseException) {
                 try {
