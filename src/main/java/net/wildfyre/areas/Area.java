@@ -45,6 +45,7 @@ public class Area extends Descriptor {
     //region Attributes
 
     private final String id;
+    private final String displayName;
 
     private int reputation;
     private int spread;
@@ -55,12 +56,17 @@ public class Area extends Descriptor {
     /**
      * Creates an Area with only its id.
      * @param name the id of the Area.
+     * @param displayName the display name of the Area (defaults to null)
      */
-    Area(String name){
+    Area(String name, String displayName){
         if(name == null)
             throw new NullPointerException("The parameter 'name' shouldn't be null.");
 
+        if(displayName == null)
+            displayName = name;
+
         this.id = name;
+        this.displayName = displayName;
     }
 
     //endregion
@@ -79,23 +85,10 @@ public class Area extends Descriptor {
     /**
      * The display name of the Area.
      *
-     * <p>In future versions, the display name of the Area will be handled by the server. This has not been implemented
-     * yet, in the meantime, we provide a method that takes {@link #ID() the ID} and adds an uppercase letter to the
-     * beginning of each word. Since this method is temporary, we make no claim that it is performance-efficient.</p>
-     *
      * @return The display name of the Area.
      */
     public String name() {
-        char[] chars = id.toCharArray();
-
-        boolean nextUpper = true;
-        for(int i = 0; i < chars.length; i++){
-            if(nextUpper)
-                chars[i] = Character.toUpperCase(chars[i]);
-            nextUpper = Character.isSpaceChar(chars[i]);
-        }
-
-        return String.valueOf(chars);
+        return displayName;
     }
 
     /**

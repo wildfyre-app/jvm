@@ -17,6 +17,7 @@
 package net.wildfyre.areas;
 
 import com.eclipsesource.json.JsonArray;
+import com.eclipsesource.json.JsonObject;
 import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.WriterConfig;
 import net.wildfyre.api.Internal;
@@ -89,7 +90,9 @@ public class Areas {
         areas = new LazyMap<>(json.size()); // exact number of areas for better memory optimization
 
         json.forEach((JsonValue area) -> {
-            String name = area.asObject().getString("name", null);
+            JsonObject it = area.asObject();
+            String name = it.getString("name", null);
+            String displayName = it.getString("displayname", null);
 
             if(name == null)
                 throw new NullPointerException("Cannot have a 'null' area: \n"
@@ -97,7 +100,7 @@ public class Areas {
 
             areas.put (
                 name,
-                get(name).orElseGet(() -> new Area(name))
+                get(name).orElseGet(() -> new Area(name, displayName))
             );
         });
     }
