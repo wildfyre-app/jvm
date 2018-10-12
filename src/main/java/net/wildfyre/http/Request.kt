@@ -43,7 +43,7 @@ class Request
 @Throws(CantConnectException::class)
 constructor(private val method: Method, private val address: String) {
 
-    //region Initialization
+    //region Initialization & Variables
 
     private val requestUrl = URL(url + address)
     private val headers = HashMap<String, String>()
@@ -70,12 +70,12 @@ constructor(private val method: Method, private val address: String) {
 
         if (fileOutput != null)
             multipart(conn)
-        else if (jsonOutput != null) {
+        else jsonOutput?.let {
             conn.setRequestProperty("Content-Type", DataType.JSON.toString())
 
             conn.doOutput = true
             val bw = BufferedWriter(OutputStreamWriter(conn.outputStream, CHARSET))
-            jsonOutput!!.writeTo(bw)
+            it.writeTo(bw)
             bw.close()
         }
 
@@ -101,12 +101,13 @@ constructor(private val method: Method, private val address: String) {
 
         writer.writeUTF(hyphens + boundary + endl)
 
-        if (jsonOutput != null) {
+        // Ignore if jsonOutput is null
+        jsonOutput?.let {
             writer.writeUTF("Content-Disposition: form-data; name: \"???\"$endl") //TODO: Name ???
             writer.writeUTF("Content-Type: ${DataType.JSON}; charset= $CHARSET$endl")
             writer.writeUTF(endl)
 
-            jsonOutput!!.writeTo(PrintWriter(writer))
+            it.writeTo(PrintWriter(writer))
 
             writer.writeUTF(endl)
         }
@@ -115,9 +116,11 @@ constructor(private val method: Method, private val address: String) {
         writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(fileOutput!!.name)}" + endl)
         writer.writeUTF(endl)
 
-        fileOutput!!.inputStream()
-            .readBytes()
-            .forEach { writer.writeByte(it.toInt()) }
+        // Write the inputStream, throw NPE if null
+        fileOutput!!.inputStream().run {
+            readBytes().forEach { writer.writeByte(it.toInt()) }
+            close()
+        }
 
         writer.writeUTF(endl)
         writer.writeUTF(hyphens + boundary + hyphens + endl)
