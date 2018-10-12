@@ -152,6 +152,17 @@ constructor(private val method: Method, private val address: String) {
     }
 
     /**
+     * Adds a file that will be uploaded along the request.
+     * @param file the file
+     * @return This request itself, to allow method-chaining.
+     */
+    fun addFile(file: File): Request {
+        fileOutput = file
+
+        return this
+    }
+
+    /**
      * Accesses the JSON response from the server.
      * @return The JSON response from the server.
      * @throws IssueInTransferException if there is problem with the connection or the data
