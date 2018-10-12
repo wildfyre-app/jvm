@@ -112,18 +112,20 @@ constructor(private val method: Method, private val address: String) {
             writer.writeUTF(endl)
         }
 
-        writer.writeUTF("Content-Disposition: form-data; name: \"???\"; filename: \"???\"$endl") //TODO: Name?
-        writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(fileOutput!!.name)}" + endl)
-        writer.writeUTF(endl)
+        // Throw NullPointerException if fileOutput is null
+        fileOutput!!.let { file ->
+            writer.writeUTF("Content-Disposition: form-data; name: \"???\"; filename: \"???\"$endl") //TODO: Name?
+            writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(file.name)}" + endl)
+            writer.writeUTF(endl)
 
-        // Write the inputStream, throw NPE if null
-        fileOutput!!.inputStream().run {
-            readBytes().forEach { writer.writeByte(it.toInt()) }
-            close()
+            file.inputStream().run {
+                readBytes().forEach { writer.writeByte(it.toInt()) }
+                close()
+            }
+
+            writer.writeUTF(endl)
+            writer.writeUTF(hyphens + boundary + hyphens + endl)
         }
-
-        writer.writeUTF(endl)
-        writer.writeUTF(hyphens + boundary + hyphens + endl)
 
         writer.flush()
         writer.close()
