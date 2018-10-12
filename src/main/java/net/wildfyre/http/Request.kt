@@ -107,7 +107,7 @@ constructor(private val method: Method, private val address: String) {
             writer.writeUTF("Content-Type: ${DataType.JSON}; charset= $CHARSET$endl")
             writer.writeUTF(endl)
 
-            it.writeTo(PrintWriter(writer))
+            it.writeTo(PrintWriter(OutputStreamWriter(writer, CHARSET)))
 
             writer.writeUTF(endl)
         }
