@@ -18,7 +18,6 @@ package net.wildfyre.posts;
 
 import net.wildfyre.areas.Area;
 import net.wildfyre.areas.Areas;
-import net.wildfyre.http.Request;
 import net.wildfyre.http.RequestTest;
 import net.wildfyre.users.Users;
 import org.junit.Before;
@@ -32,14 +31,14 @@ import static org.junit.Assert.*;
 public class PostTest {
 
     @Before
-    public void before() throws Request.CantConnectException {
+    public void before() {
         RequestTest.Companion.connectToTestDB();
     }
 
     @Test
     public void getOtherPost() {
         Optional<Post> op = Areas.get("sample").orElseThrow(RuntimeException::new)
-            .post(978262331);
+            .post(769090871);
 
         assertTrue(op.isPresent());
 
