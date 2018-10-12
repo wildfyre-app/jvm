@@ -25,8 +25,6 @@ import net.wildfyre.users.LoggedUser
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.ByteArrayInputStream
-import java.io.InputStream
-import java.io.UnsupportedEncodingException
 
 class RequestTest {
 
@@ -74,22 +72,10 @@ class RequestTest {
 
     @Test
     fun testJSON() {
-        var input: InputStream? = null
-        try {
-            input = ByteArrayInputStream("{\"data\": 2}".toByteArray(charset(Request.CHARSET)))
-        } catch (e: UnsupportedEncodingException) {
-            fail("Could not read Stream.")
-        }
+        val input = ByteArrayInputStream("{\"data\": 2}".toByteArray(charset(Request.CHARSET)))
 
-        assertNotNull(input)
-        try {
-            val json = Request.readJson(input!!)
-
-            assertEquals(JsonObject().add("data", 2), json)
-        } catch (e: IssueInTransferException) {
-            fail("Could not parse to JSON.")
-        }
-
+        val json = Request.readJson(input)
+        assertEquals(JsonObject().add("data", 2), json)
     }
 
     @Test
