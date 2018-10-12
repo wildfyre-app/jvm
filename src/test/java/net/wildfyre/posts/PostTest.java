@@ -38,8 +38,8 @@ public class PostTest {
 
     @Test
     public void getOtherPost() {
-        Optional<Post> op = Areas.get("fun").orElseThrow(RuntimeException::new)
-            .post(378627832);
+        Optional<Post> op = Areas.get("sample").orElseThrow(RuntimeException::new)
+            .post(978262331);
 
         assertTrue(op.isPresent());
 
@@ -61,25 +61,25 @@ public class PostTest {
             .asLogged()
             .postsList();
 
-        assertEquals(2, posts.size());
+        assertEquals(3, posts.size());
 
         Post p1 = posts.get(0);
-        assertTrue(p1.isAnonymous());
+        assertFalse(p1.isAnonymous());
         assertTrue(p1.hasSubscribed());
         assertTrue(p1.isActive());
-        assertFalse(p1.author().isPresent());
+        assertTrue(p1.author().isPresent());
+        assertEquals(Users.me(), p1.author().get());
 
         Post p2 = posts.get(1);
-        assertFalse(p2.isAnonymous());
+        assertTrue(p2.isAnonymous());
         assertTrue(p2.hasSubscribed());
         assertTrue(p2.isActive());
-        assertTrue(p2.author().isPresent());
-        assertEquals(Users.me(), p2.author().get());
+        assertFalse(p2.author().isPresent());
     }
 
     @Test
     public void createDraft(){
-        Area a = Areas.get("fun").orElseThrow(RuntimeException::new);
+        Area a = Areas.get("sample").orElseThrow(RuntimeException::new);
 
         Draft d = a.draft()
             .setText("This is a test")

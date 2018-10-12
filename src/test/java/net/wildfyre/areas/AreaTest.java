@@ -37,19 +37,16 @@ public class AreaTest {
     @Test
     public void testQuery() throws Request.CantConnectException {
         Areas.load();
-        assertTrue(true);
+
+        assertTrue(Areas.get("sample").isPresent());
+        assertEquals("sample", Areas.get("sample").get().ID());
+        assertEquals("Sample", Areas.get("sample").get().name());
     }
 
     @Test
     public void testUpdate() throws Request.CantConnectException, NoSuchEntityException {
-        Area a = new Area("fun");
+        Area a = new Area("sample", null);
         a.update(); // this test fails if any exception is thrown, success if no exception is thrown
-    }
-
-    @Test
-    public void testName(){
-        assertEquals("This Is A Test", new Area("this is a test").name());
-        assertEquals("Test", new Area("test").name());
     }
 
     @Test
@@ -69,7 +66,7 @@ public class AreaTest {
         // Since this is not possible to do natively, I load an Area with a good ID, then use reflection to modify
         // that ID, then reload.
 
-        Area area = Areas.get("fun")
+        Area area = Areas.get("sample")
             .orElseThrow(RuntimeException::new);
 
         Field id = area
