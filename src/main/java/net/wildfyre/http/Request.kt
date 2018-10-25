@@ -99,11 +99,10 @@ constructor(private val method: Method, private val address: String) {
         val output = conn.outputStream
         val writer = DataOutputStream(output)
 
-        writer.writeUTF(hyphens + boundary + endl)
-
         // Ignore if jsonOutput is null
         jsonOutput?.let {
-            writer.writeUTF("Content-Disposition: form-data; name: \"???\"$endl") //TODO: Name ???
+            writer.writeUTF(hyphens + boundary + endl)
+            writer.writeUTF("Content-Disposition: form-data; name: \"json\"$endl")
             writer.writeUTF("Content-Type: ${DataType.JSON}; charset= $CHARSET$endl")
             writer.writeUTF(endl)
 
@@ -114,7 +113,8 @@ constructor(private val method: Method, private val address: String) {
 
         // Throw NullPointerException if fileOutput is null
         fileOutput!!.let { file ->
-            writer.writeUTF("Content-Disposition: form-data; name: \"???\"; filename: \"???\"$endl") //TODO: Name?
+            writer.writeUTF(hyphens + boundary + endl)
+            writer.writeUTF("Content-Disposition: form-data; name: \"upload\"; filename: \"${file.name}\"$endl")
             writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(file.name)}" + endl)
             writer.writeUTF(endl)
 
