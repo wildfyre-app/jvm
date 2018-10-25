@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -33,25 +32,6 @@ public class PostTest {
     @Before
     public void before() {
         RequestTest.Companion.connectToTestDB();
-    }
-
-    @Test
-    public void getOtherPost() {
-        Optional<Post> op = Areas.get("sample").orElseThrow(RuntimeException::new)
-            .post(769090871);
-
-        assertTrue(op.isPresent());
-
-        Post p = op.get();
-        assertFalse(p.isAnonymous());
-        assertTrue(p.hasSubscribed());
-        assertTrue(p.isActive());
-
-        Comment c1 = p.commentsList().get(0);
-        assertEquals(1, c1.author().getID());
-
-        Comment c2 = p.commentsList().get(1);
-        assertEquals(Users.me(), c2.author());
     }
 
     @Test
