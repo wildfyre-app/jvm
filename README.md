@@ -3,17 +3,15 @@
 [![Javadocs](https://bit.ly/2vxyIa5)](https://bit.ly/2OBImBj)
 [![Maven Central](https://bit.ly/2AiQT95)](https://bit.ly/2K1PTG4)
 
-## Installation
+## Making a project using this library
 
-To install this library for testing..., clone it and ensure you have Java installed (at least version 1.8).
+This library is available on [MavenCentral](https://search.maven.org/search?q=g:net.wildfyre),
+you can find the different ways to import it there.
 
-You can check your Java version by running:
+## Collaborating
 
-    $ java -version
-
-To use this library as a dependency, you WILL BE able to import it from MavenCentral in the future.
-
-## Testing...
+Bugs, tasks and issues are discussed [here](https://phabricator.wildfyre.net/tag/libwf-java/),
+the source code is available [here](https://phabricator.wildfyre.net/source/libwf-java/).
 
 Here is the list of commands you can use to check the code (you can replace `./gradlew` by `gradlew.bat` on Windows):
 
