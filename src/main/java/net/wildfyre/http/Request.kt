@@ -96,7 +96,7 @@ constructor(private val method: Method, private val address: String) {
         conn.doOutput = true
         conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
 
-        val output = conn.outputStream!!
+        val output = conn.outputStream
         val writer = DataOutputStream(output)
 
         // Ignore if jsonOutput is null

@@ -31,7 +31,6 @@ class RequestTest {
     @Test
     fun connect() {
         try {
-
             val j = Request(POST, "/account/auth/")
                 .addJson(JsonObject()
                     .add("username", "user")
@@ -39,8 +38,6 @@ class RequestTest {
                 .getJson()
 
             assertNotNull(j.asObject().getString("token", null))
-        } catch (e: Request.CantConnectException) {
-            throw IllegalArgumentException(e)
         } catch (e: IssueInTransferException) {
             if (e.json.isPresent)
                 fail("Issue in transfer: " + e.json.get().toString(PRETTY_PRINT))
@@ -51,23 +48,15 @@ class RequestTest {
 
     @Test
     fun getOwnPage() {
-        try {
-            val j = Request(GET, "/users/")
-                .addToken(token)
-                .getJson()
-                .asObject()
+        val j = Request(GET, "/users/")
+            .addToken(token)
+            .getJson()
+            .asObject()
 
-            assertNotEquals(-1, j.getInt("user", -1).toLong())
-            assertEquals("user", j.getString("name", "not found"))
-            assertNotNull(j.getString("bio", null))
-            assertFalse(j.getBoolean("banned", true))
-
-        } catch (e: Request.CantConnectException) {
-            throw RuntimeException(e)
-        } catch (e: IssueInTransferException) {
-            throw RuntimeException(e)
-        }
-
+        assertNotEquals(-1, j.getInt("user", -1).toLong())
+        assertEquals("user", j.getString("name", "not found"))
+        assertNotNull(j.getString("bio", null))
+        assertFalse(j.getBoolean("banned", true))
     }
 
     @Test
