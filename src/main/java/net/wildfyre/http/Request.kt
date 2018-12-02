@@ -96,7 +96,7 @@ constructor(private val method: Method, private val address: String) {
         conn.doOutput = true
         conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
 
-        val output = conn.outputStream
+        val output = conn.outputStream!!
         val writer = DataOutputStream(output)
 
         // Ignore if jsonOutput is null
@@ -155,6 +155,8 @@ constructor(private val method: Method, private val address: String) {
 
     /**
      * Adds a file that will be uploaded along the request.
+     *
+     * Only one file can be added to a request.
      * @param file the file
      * @return This request itself, to allow method-chaining.
      */
@@ -187,10 +189,11 @@ constructor(private val method: Method, private val address: String) {
     }
 
     //endregion
-    //region Exceptions
 
     /**
      * Thrown when the request failed because the requested could not connect to the server.
+     * @param msg The message to be displayed
+     * @param e The more detailed exception
      */
     class CantConnectException internal constructor(msg: String, e: Exception) : IOException(msg, e)
 
@@ -317,8 +320,6 @@ constructor(private val method: Method, private val address: String) {
                 }
             }
         }
-
-        //endregion
     }
 
 }
