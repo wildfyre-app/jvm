@@ -23,7 +23,6 @@ import net.wildfyre.api.Internal
 import net.wildfyre.http.Request.CantConnectException
 import java.io.*
 import java.net.HttpURLConnection
-import java.net.ProtocolException
 import java.net.URL
 import java.net.URLConnection
 import java.util.stream.Collectors
@@ -46,10 +45,13 @@ constructor(private val method: Method, private val address: String) {
     //region Initialization & Variables
 
     private val requestUrl = URL(url + address)
-    private val headers = HashMap<String, String>()
+    internal val headers = HashMap<String, String>()
 
     private var jsonOutput: JsonValue? = null
     private var fileOutput: File? = null
+    private var fileOutputName: String? = null
+
+    private val id = reqId++
 
     init {
         headers["From"] = "lib-java"
@@ -63,15 +65,20 @@ constructor(private val method: Method, private val address: String) {
         val conn = connect(requestUrl)
         conn.doInput = true // We always want input
 
-        setRequestedMethod(conn, method)
+        println("\n$id:$method $requestUrl HTTP/1.1")
+        method.setMethod(conn, this)
 
-        for ((header, value) in headers)
+        var i = 0
+        for ((header, value) in headers) {
+            println("$id:${i++} - $header: $value")
             conn.setRequestProperty(header, value)
+        }
 
         if (fileOutput != null)
             multipart(conn)
         else jsonOutput?.let {
             conn.setRequestProperty("Content-Type", DataType.JSON.toString())
+            println("$id:$i - Content-Type: ${DataType.JSON}")
 
             conn.doOutput = true
             val bw = BufferedWriter(OutputStreamWriter(conn.outputStream, CHARSET))
@@ -79,6 +86,7 @@ constructor(private val method: Method, private val address: String) {
             bw.close()
         }
 
+        println("$id: Done sending.")
         return conn
     }
 
@@ -89,6 +97,8 @@ constructor(private val method: Method, private val address: String) {
      * [https://www.codejava.net/java-se/networking/upload-files-by-sending-multipart-request-programmatically]
      */
     private fun multipart(conn: HttpURLConnection) {
+        println("$id: This is a multipart request")
+
         val endl = "\r\n"
         val hyphens = "--"
         val boundary = "===${System.currentTimeMillis()}==="
@@ -101,6 +111,8 @@ constructor(private val method: Method, private val address: String) {
 
         // Ignore if jsonOutput is null
         jsonOutput?.let {
+            println("$id: There is some JSON attached")
+
             writer.writeUTF(hyphens + boundary + endl)
             writer.writeUTF("Content-Disposition: form-data; name: \"json\"$endl")
             writer.writeUTF("Content-Type: ${DataType.JSON}; charset= $CHARSET$endl")
@@ -114,7 +126,7 @@ constructor(private val method: Method, private val address: String) {
         // Throw NullPointerException if fileOutput is null
         fileOutput!!.let { file ->
             writer.writeUTF(hyphens + boundary + endl)
-            writer.writeUTF("Content-Disposition: form-data; name: \"upload\"; filename: \"${file.name}\"$endl")
+            writer.writeUTF("Content-Disposition: form-data; name: \"$fileOutputName\"; filename: \"${file.name}\"$endl")
             writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(file.name)}" + endl)
             writer.writeUTF(endl)
 
@@ -160,8 +172,9 @@ constructor(private val method: Method, private val address: String) {
      * @param file the file
      * @return This request itself, to allow method-chaining.
      */
-    fun addFile(file: File): Request {
+    fun addFile(name: String, file: File): Request {
         fileOutput = file
+        fileOutputName = name
 
         return this
     }
@@ -186,6 +199,60 @@ constructor(private val method: Method, private val address: String) {
     fun getJson(): JsonValue {
         headers["Accept"] = DataType.JSON.toString()
         return readJson(getInputStream(send()))
+    }
+
+    //endregion
+    //region Helpers
+
+    /**
+     * Connects to the provided URL.
+     *
+     * @param url the URL the API should connect to
+     * @return The connection to the server, on success.
+     * @throws CantConnectException Failure to connect to the server.
+     */
+    @Throws(CantConnectException::class)
+    internal fun connect(url: URL): HttpURLConnection {
+        try {
+            return url.openConnection() as HttpURLConnection
+
+        } catch (e: IOException) {
+            throw CantConnectException("Cannot connect to the server.", e)
+        }
+    }
+
+    /**
+     * Converts the JSON parameters to an array of bytes that can be sent in the request. The charset used is
+     * specified in [CHARSET].
+     *
+     * @param params the JSON parameters to be converted.
+     * @return A byte array representing the provided parameters.
+     */
+    internal fun convertToByteArray(params: JsonValue): ByteArray {
+        try {
+            return params.toString().toByteArray(charset(CHARSET))
+
+        } catch (e: UnsupportedEncodingException) {
+            throw RuntimeException("There was a problem with the character encoding '" + CHARSET + "'." +
+                "Because it is hard-written in the class, this error should never happen.", e)
+        }
+    }
+
+    /**
+     * Reads the server's response and handles eventual exceptions.
+     * @return The server's response.
+     * @throws IssueInTransferException If the server refuses the request, see
+     * [getJson()][IssueInTransferException.getJson] to get the eventual error message.
+     */
+    @Throws(IssueInTransferException::class)
+    internal fun getInputStream(connection: HttpURLConnection): InputStream {
+        try {
+            println("$id: Beginning reception... HTTP Status: ${connection.responseCode}")
+            return connection.inputStream
+
+        } catch (e: IOException) {
+            throw IssueInTransferException("$id: The server refused the request.", connection.errorStream)
+        }
     }
 
     //endregion
@@ -214,73 +281,7 @@ constructor(private val method: Method, private val address: String) {
 
         //region Helpers
 
-        /**
-         * Connects to the provided URL.
-         *
-         * @param url the URL the API should connect to
-         * @return The connection to the server, on success.
-         * @throws CantConnectException Failure to connect to the server.
-         */
-        @Throws(CantConnectException::class)
-        internal fun connect(url: URL): HttpURLConnection {
-            try {
-                return url.openConnection() as HttpURLConnection
-
-            } catch (e: IOException) {
-                throw CantConnectException("Cannot connect to the server.", e)
-            }
-
-        }
-
-        /**
-         * Converts the JSON parameters to an array of bytes that can be sent in the request. The charset used is
-         * specified in [CHARSET].
-         *
-         * @param params the JSON parameters to be converted.
-         * @return A byte array representing the provided parameters.
-         */
-        internal fun convertToByteArray(params: JsonValue): ByteArray {
-            try {
-                return params.toString().toByteArray(charset(CHARSET))
-
-            } catch (e: UnsupportedEncodingException) {
-                throw RuntimeException("There was a problem with the character encoding '" + CHARSET + "'." +
-                    "Because it is hard-written in the class, this error should never happen.", e)
-            }
-
-        }
-
-        /**
-         * Sets the method for the request and handles eventual exceptions.
-         * @param connection the connection that should be modified
-         * @param method the HTTP method used for the request
-         */
-        internal fun setRequestedMethod(connection: HttpURLConnection, method: Method) {
-            try {
-                connection.requestMethod = method.name
-
-            } catch (e: ProtocolException) {
-                throw IllegalArgumentException("Cannot set the method to $method", e)
-            }
-
-        }
-
-        /**
-         * Reads the server's response and handles eventual exceptions.
-         * @return The server's response.
-         * @throws IssueInTransferException If the server refuses the request, see
-         * [getJson()][IssueInTransferException.getJson] to get the eventual error message.
-         */
-        @Throws(IssueInTransferException::class)
-        internal fun getInputStream(connection: HttpURLConnection): InputStream {
-            try {
-                return connection.inputStream
-
-            } catch (e: IOException) {
-                throw IssueInTransferException("The server refused the request.", connection.errorStream)
-            }
-
-        }
+        private var reqId = 0
 
         /**
          * Reads the JSON data.
@@ -310,10 +311,10 @@ constructor(private val method: Method, private val address: String) {
             } catch (e: ParseException) {
                 try {
                     val content = BufferedReader(InputStreamReader(input, CHARSET))
-                            .lines()
-                            .collect(Collectors.joining("\n"))
+                        .lines()
+                        .collect(Collectors.joining("\n"))
                     throw RuntimeException("The content of the InputStream was not a JSON object:\n"
-                            + content + "\nSize: " + content.length, e)
+                        + content + "\nSize: " + content.length, e)
 
                 } catch (e1: UnsupportedEncodingException) {
                     throw RuntimeException("This should never happen: Request.CHARSET is wrong.", e1)
