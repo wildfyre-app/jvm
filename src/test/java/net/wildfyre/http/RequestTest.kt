@@ -19,12 +19,13 @@ package net.wildfyre.http
 import com.eclipsesource.json.JsonObject
 import com.eclipsesource.json.WriterConfig.PRETTY_PRINT
 import net.wildfyre.api.WildFyre
-import net.wildfyre.http.Method.GET
-import net.wildfyre.http.Method.POST
+import net.wildfyre.http.Method.*
 import net.wildfyre.users.LoggedUser
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.ByteArrayInputStream
+import java.io.File
+import java.util.*
 
 class RequestTest {
 
@@ -73,8 +74,50 @@ class RequestTest {
         assertTrue(Request.isTesting)
     }
 
+    fun createTmpUser(): LoggedUser {
+        val rnd = Random(System.nanoTime()).nextInt()
+        val password = "123546abcdef"
+        val username = "tmp$rnd"
+
+        Request(POST, "/account/register/")
+            .addJson(JsonObject()
+                .add("username", username)
+                .add("email", "123456@wildfyre.net")
+                .add("password", password)
+                .add("captcha", "123456"))  // the field cannot be blank, but is useless in test mode
+            .getJson().asObject()
+
+        WildFyre.disconnect()
+        return WildFyre.connect(username, password)
+    }
+
+    @Test( timeout = 4000L )
+    fun testPatchMethod() {
+        val me = createTmpUser()
+
+        val test = "This is a test"
+        me.setBio(test)
+        assertEquals(test, me.bio())
+    }
+
+    @Test( timeout = 4000L ) // timeout of 4 seconds
+    fun testMultipart() {
+        createTmpUser()
+
+        val f = ressources["wf.png"]
+        assertTrue("The file ${f.absolutePath} should exist!", f.exists())
+
+        val json = Request(PATCH, "/users/")
+            .addFile("avatar", f)
+            .addToken()
+            .getJson()
+
+        println(json.toString(PRETTY_PRINT))
+    }
+
     companion object {
         internal val token: String
+        internal val ressources = File("src/test/resources")
 
         init {
             token = Request(POST, "/account/auth/")
@@ -92,6 +135,8 @@ class RequestTest {
         fun connectToTestDB(): LoggedUser {
             return WildFyre.connect(token)
         }
+
+        internal operator fun File.get(name: String) = File(this, name)
     }
 
 }
