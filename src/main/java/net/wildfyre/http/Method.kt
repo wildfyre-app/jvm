@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package net.wildfyre.http;
+package net.wildfyre.http
+
+import java.net.HttpURLConnection
+import java.net.ProtocolException
 
 /**
  * The HTTP method used to connect to the server.
  *
  * This class is NOT part of the public API.
  */
-public enum Method {
-    /** Change parts of the resource. */
-    PATCH,
+enum class Method {
+    /** Change parts of the resource.  */
+    PATCH {
+        override fun setMethod(conn: HttpURLConnection, req: Request) {
+            POST.setMethod(conn, req)
+
+            req.headers["X-HTTP-Method-Override"] = name
+        }
+    },
 
     /** Get a resource. */
     GET,
@@ -40,8 +49,17 @@ public enum Method {
     /** Send a new resource. */
     POST;
 
-    @Override
-    public String toString(){
-        return name();
+    override fun toString(): String = name
+
+    /**
+     * Sets the method of a [HttpURLConnection] to one of the methods supported by this enum.
+     */
+    open fun setMethod(conn: HttpURLConnection, req: Request){
+        try {
+            conn.requestMethod = this.name
+
+        } catch (e: ProtocolException) {
+            throw IllegalArgumentException("Cannot set the method to $name", e)
+        }
     }
 }
