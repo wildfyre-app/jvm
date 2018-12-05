@@ -146,6 +146,7 @@ public class Users {
      */
     public static void reset(){
         userId = -1;
+        users.clear();
     }
 
     /**
