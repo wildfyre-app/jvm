@@ -124,7 +124,7 @@ constructor(private val method: Method, private val address: String) {
         }
 
         // Throw NullPointerException if fileOutput is null
-        fileOutput!!.let { file ->
+        fileOutput?.let { file ->
             writer.writeUTF(hyphens + boundary + endl)
             writer.writeUTF("Content-Disposition: form-data; name: \"$fileOutputName\"; filename: \"${file.name}\"$endl")
             writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(file.name)}" + endl)
@@ -137,7 +137,8 @@ constructor(private val method: Method, private val address: String) {
 
             writer.writeUTF(endl)
             writer.writeUTF(hyphens + boundary + hyphens + endl)
-        }
+        } ?:throw NullPointerException("This method has been called with a fileOutput=$fileOutput, " +
+            "but this should not be possible.")
 
         writer.flush()
         writer.close()
