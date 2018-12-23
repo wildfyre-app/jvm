@@ -28,7 +28,7 @@ enum class Method {
     /** Change parts of the resource.  */
     PATCH {
         override fun setMethod(conn: HttpURLConnection, req: Request) {
-            POST.setMethod(conn, req)
+            PUT.setMethod(conn, req)
 
             req.headers["X-HTTP-Method-Override"] = name
         }
