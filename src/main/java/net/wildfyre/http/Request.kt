@@ -19,6 +19,7 @@ package net.wildfyre.http
 import com.eclipsesource.json.Json
 import com.eclipsesource.json.JsonValue
 import com.eclipsesource.json.ParseException
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import net.wildfyre.api.Internal
 import net.wildfyre.http.Request.CantConnectException
 import java.io.*
@@ -32,6 +33,10 @@ import java.util.stream.Collectors
  *
  * This class is NOT part of the public API.
  */
+@SuppressFBWarnings(
+    value = ["ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"],
+    justification = "The static variable 'reqId' is marked as Synchronized to avoid any problems."
+)
 class Request
 /**
  * Creates a new request to the server, which will be executed on a call such as [get].
@@ -294,6 +299,7 @@ constructor(private val method: Method, private val address: String) {
         //region Helpers
 
         private var reqId = 0
+            @Synchronized set
 
         /**
          * Reads the JSON data.

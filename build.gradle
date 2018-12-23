@@ -1,3 +1,5 @@
+import org.gradle.internal.jvm.Jvm
+
 plugins {
     id 'java'
     id 'findbugs'
@@ -32,6 +34,8 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
+    compile 'com.google.code.findbugs:annotations:3.0.1'
+    compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
@@ -51,11 +55,11 @@ tasks.withType(FindBugs) {
 }
 
 findbugsMain {
-    classpath += files org.gradle.internal.jvm.Jvm.current().getJavaHome()
+    classpath += files Jvm.current().getJavaHome()
 }
 
 findbugsTest {
-    classpath += files org.gradle.internal.jvm.Jvm.current().getJavaHome()
+    classpath += files Jvm.current().getJavaHome()
 }
 
 // Removes the directories out/ (created by IntelliJ) and wildfyre.net/ (created by the maven plugin) when calling

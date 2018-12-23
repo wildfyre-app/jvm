@@ -29,6 +29,8 @@ import java.util.*
 
 class RequestTest {
 
+    private val rnd = Random(System.nanoTime())
+
     @Test
     fun connect() {
         try {
@@ -75,9 +77,8 @@ class RequestTest {
     }
 
     fun createTmpUser(): LoggedUser {
-        val rnd = Random(System.nanoTime()).nextInt()
         val password = "123546abcdef"
-        val username = "tmp$rnd"
+        val username = "tmp${rnd.nextInt()}"
 
         Request(POST, "/account/register/")
             .addJson(JsonObject()
@@ -117,6 +118,10 @@ class RequestTest {
     }
 
     companion object {
+        // The inspector *thinks* it's possible, but it's not,
+        // because it needs to be done when the class is loaded
+        // (init) and NOT when the variables are instantiated.
+        @Suppress("JoinDeclarationAndAssignment")
         internal val token: String
         internal val resources = File("src/test/resources")
 
