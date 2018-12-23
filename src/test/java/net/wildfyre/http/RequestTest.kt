@@ -109,6 +109,7 @@ class RequestTest {
 
         val json = Request(PATCH, "/users/")
             .addFile("avatar", f)
+            .addJson(JsonObject().add("bio", "test"))
             .addToken()
             .getJson()
 

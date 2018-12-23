@@ -114,14 +114,16 @@ constructor(private val method: Method, private val address: String) {
         jsonOutput?.let {
             println("$id: There is some JSON attached")
 
-            writer.write(hyphens + boundary + endl)
-            writer.write("Content-Disposition: form-data; name=\"json\"$endl")
-            writer.write("Content-Type: ${DataType.JSON}; charset=$CHARSET$endl")
-            writer.write(endl)
+            it.asObject().forEach { obj ->
+                writer.write(hyphens + boundary + endl)
+                writer.write("Content-Disposition: form-data; name=\"${obj.name}\"$endl")
+                writer.write("Content-Type: ${DataType.JSON}; charset=$CHARSET$endl")
+                writer.write(endl)
 
-            it.writeTo(PrintWriter(OutputStreamWriter(writer, CHARSET)))
+                obj.value.writeTo(PrintWriter(OutputStreamWriter(writer, CHARSET)))
 
-            writer.write(endl)
+                writer.write(endl)
+            }
         }
 
         // Throw NullPointerException if fileOutput is null
