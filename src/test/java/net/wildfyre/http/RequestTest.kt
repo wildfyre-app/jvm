@@ -104,7 +104,7 @@ class RequestTest {
     fun testMultipart() {
         createTmpUser()
 
-        val f = ressources["wf.png"]
+        val f = resources["wf.png"]
         assertTrue("The file ${f.absolutePath} should exist!", f.exists())
 
         val json = Request(PATCH, "/users/")
@@ -118,7 +118,7 @@ class RequestTest {
 
     companion object {
         internal val token: String
-        internal val ressources = File("src/test/resources")
+        internal val resources = File("src/test/resources")
 
         init {
             token = Request(POST, "/account/auth/")
