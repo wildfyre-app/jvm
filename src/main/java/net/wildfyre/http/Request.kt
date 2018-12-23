@@ -86,9 +86,9 @@ constructor(private val method: Method, private val address: String) {
             println("$id:$i - Content-Type: ${DataType.JSON}")
 
             conn.doOutput = true
-            val bw = BufferedWriter(OutputStreamWriter(conn.outputStream, CHARSET))
-            it.writeTo(bw)
-            bw.close()
+            BufferedWriter(OutputStreamWriter(conn.outputStream, CHARSET)).use { bw ->
+                it.writeTo(bw)
+            }
         }
 
         println("$id: Done sending.")
