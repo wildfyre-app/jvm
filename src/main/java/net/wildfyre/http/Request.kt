@@ -104,39 +104,40 @@ constructor(private val method: Method, private val address: String) {
         val boundary = "----${System.currentTimeMillis()}---"
 
         conn.doOutput = true
-        conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
+        conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
 
         val output = conn.outputStream
         val writer = DataOutputStream(output)
+        writer.flush()
 
         // Ignore if jsonOutput is null
         jsonOutput?.let {
             println("$id: There is some JSON attached")
 
-            writer.writeUTF(hyphens + boundary + endl)
-            writer.writeUTF("Content-Disposition: form-data; name: \"json\"$endl")
-            writer.writeUTF("Content-Type: ${DataType.JSON}; charset= $CHARSET$endl")
-            writer.writeUTF(endl)
+            writer.write(hyphens + boundary + endl)
+            writer.write("Content-Disposition: form-data; name=\"json\"$endl")
+            writer.write("Content-Type: ${DataType.JSON}; charset=$CHARSET$endl")
+            writer.write(endl)
 
             it.writeTo(PrintWriter(OutputStreamWriter(writer, CHARSET)))
 
-            writer.writeUTF(endl)
+            writer.write(endl)
         }
 
         // Throw NullPointerException if fileOutput is null
         fileOutput?.let { file ->
-            writer.writeUTF(hyphens + boundary + endl)
-            writer.writeUTF("Content-Disposition: form-data; name: \"$fileOutputName\"; filename: \"${file.name}\"$endl")
-            writer.writeUTF("Content-Type: ${URLConnection.guessContentTypeFromName(file.name)}" + endl)
-            writer.writeUTF(endl)
+            writer.write(hyphens + boundary + endl)
+            writer.write("Content-Disposition: form-data; name=\"$fileOutputName\"; filename=\"${file.name}\"$endl")
+            writer.write("Content-Type: ${URLConnection.guessContentTypeFromName(file.name)}" + endl)
+            writer.write(endl)
 
             file.inputStream().run {
                 readBytes().forEach { writer.writeByte(it.toInt()) }
                 close()
             }
 
-            writer.writeUTF(endl)
-            writer.writeUTF(hyphens + boundary + hyphens + endl)
+            writer.write(endl)
+            writer.write(hyphens + boundary + hyphens + endl)
         } ?:throw NullPointerException("This method has been called with a fileOutput=$fileOutput, " +
             "but this should not be possible.")
 
@@ -255,6 +256,12 @@ constructor(private val method: Method, private val address: String) {
             throw IssueInTransferException("$id: The server refused the request.", connection.errorStream)
         }
     }
+
+    /**
+     * Extension function that writes a String a to DataOutputStream
+     * and handles the charset according to [CHARSET].
+     */
+    private fun DataOutputStream.write(msg: String) = this.write(msg.toByteArray(CHARSET))
 
     //endregion
 
