@@ -22,6 +22,7 @@ import com.eclipsesource.json.ParseException
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import net.wildfyre.api.Internal
 import net.wildfyre.http.Request.CantConnectException
+import net.wildfyre.utils.ProgrammingException
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
@@ -122,12 +123,33 @@ constructor(private val method: Method, private val address: String) {
             it.asObject().forEach { obj ->
                 writer.write(hyphens + boundary + endl)
                 writer.write("Content-Disposition: form-data; name=\"${obj.name}\"$endl")
-                writer.write("Content-Type: ${DataType.JSON}; charset=$CHARSET$endl")
-                writer.write(endl)
 
-                obj.value.writeTo(PrintWriter(OutputStreamWriter(writer, CHARSET)))
+                if (obj.value.isArray || obj.value.isObject) {
+                    writer.write("Content-Type: ${DataType.JSON}; charset=$CHARSET$endl")
+                    writer.write(endl)
 
-                writer.write(endl)
+                    BufferedWriter(OutputStreamWriter(writer, CHARSET)).use { bw ->
+                        it.writeTo(bw)
+                    }
+
+                    writer.write(endl)
+                } else {
+                    writer.write("Content-Type: ${DataType.TEXT}; charset=$CHARSET$endl")
+                    writer.write(endl)
+
+                    writer.write(obj.value.let { v ->
+                        when {
+                            v.isTrue -> "true"
+                            v.isFalse -> "false"
+                            v.isNull -> "null"
+                            v.isNumber -> v.asString()
+                            v.isString -> v.asString()
+                            else -> throw ProgrammingException("Found $v which doesn't match any type.")
+                        }
+                    })
+
+                    writer.write(endl)
+                }
             }
         }
 
