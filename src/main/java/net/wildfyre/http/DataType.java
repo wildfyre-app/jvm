@@ -23,6 +23,13 @@ public enum DataType {
         public String toString() {
             return "application/json";
         }
+    },
+
+    TEXT {
+        @Override
+        public String toString() {
+            return "text/plain";
+        }
     }
 
 }
