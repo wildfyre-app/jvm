@@ -101,7 +101,7 @@ constructor(private val method: Method, private val address: String) {
 
         val endl = "\r\n"
         val hyphens = "--"
-        val boundary = "===${System.currentTimeMillis()}==="
+        val boundary = "----${System.currentTimeMillis()}---"
 
         conn.doOutput = true
         conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
@@ -231,7 +231,7 @@ constructor(private val method: Method, private val address: String) {
      */
     internal fun convertToByteArray(params: JsonValue): ByteArray {
         try {
-            return params.toString().toByteArray(charset(CHARSET))
+            return params.toString().toByteArray(CHARSET)
 
         } catch (e: UnsupportedEncodingException) {
             throw RuntimeException("There was a problem with the character encoding '" + CHARSET + "'." +
@@ -278,7 +278,9 @@ constructor(private val method: Method, private val address: String) {
         /**
          * The charset that is used to readJson/write data to the server.
          */
-        const val CHARSET = "UTF-8"
+        @JvmField // Necessary otherwise the compiler inlines this constant,
+                  // which makes in unavailable from Java
+        val CHARSET = Charsets.UTF_8
 
         //region Helpers
 

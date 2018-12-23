@@ -62,7 +62,7 @@ class RequestTest {
 
     @Test
     fun testJSON() {
-        val input = ByteArrayInputStream("{\"data\": 2}".toByteArray(charset(Request.CHARSET)))
+        val input = ByteArrayInputStream("{\"data\": 2}".toByteArray(Request.CHARSET))
 
         val json = Request.readJson(input)
         assertEquals(JsonObject().add("data", 2), json)
@@ -136,6 +136,9 @@ class RequestTest {
             return WildFyre.connect(token)
         }
 
+        /**
+         * Gets a file in the current directory.
+         */
         internal operator fun File.get(name: String) = File(this, name)
     }
 
