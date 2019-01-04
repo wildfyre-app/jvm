@@ -156,7 +156,7 @@ public class LoggedUser extends User {
      */
     public Stream<Post> posts(){
         return Areas.stream()
-            .flatMap(Area::ownPosts);
+            .flatMap(a -> a.ownPosts().stream());
     }
 
     /**

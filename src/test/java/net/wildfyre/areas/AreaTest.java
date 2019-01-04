@@ -20,7 +20,9 @@ import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.Request;
 import net.wildfyre.http.RequestTest;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -30,17 +32,20 @@ import static org.junit.Assert.*;
 public class AreaTest {
 
     @BeforeClass
-    static public void before() throws Request.CantConnectException {
+    static public void before() {
         RequestTest.Companion.connectToTestDB();
     }
+
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(2);
 
     @Test
     public void testQuery() throws Request.CantConnectException {
         Areas.load();
 
         assertTrue(Areas.get("sample").isPresent());
-        assertEquals("sample", Areas.get("sample").get().ID());
-        assertEquals("Sample", Areas.get("sample").get().name());
+        assertEquals("sample", Areas.get("sample").get().getID());
+        assertEquals("Sample", Areas.get("sample").get().getName());
     }
 
     @Test
@@ -71,7 +76,7 @@ public class AreaTest {
 
         Field id = area
             .getClass()
-            .getDeclaredField("id");
+            .getDeclaredField("ID");
 
         id.setAccessible(true);
 

@@ -23,6 +23,7 @@ import net.wildfyre.areas.Areas;
 import net.wildfyre.users.User;
 import net.wildfyre.users.Users;
 import net.wildfyre.utils.InvalidJsonException;
+import net.wildfyre.utils.ProgrammingException;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -130,8 +131,11 @@ public class Comment {
      * @return The Post in which this comment exists.
      */
     public Post post(){
-        return area().post(postID)
-            .orElseThrow(RuntimeException::new); // This is not possible: Post doesn't exist
+        Post tmp = area().post(postID);
+        if (tmp != null)
+            return tmp;
+        else
+            throw new ProgrammingException("The post must exist.", null);
     }
 
     /**
