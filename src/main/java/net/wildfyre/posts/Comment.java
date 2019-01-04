@@ -135,7 +135,7 @@ public class Comment {
         if (tmp != null)
             return tmp;
         else
-            throw new ProgrammingException("The post must exist.", null);
+            throw new ProgrammingException("The post must exist.");
     }
 
     /**
