@@ -125,7 +125,7 @@ public class Area extends Descriptor {
         try {
             JsonObject json = new Request(GET, "/areas/" + id + "/rep/")
                 .addToken(Internal.token())
-                .get()
+                .getJson()
                 .asObject();
 
             reputation = json.getInt("reputation", -1);
@@ -244,7 +244,7 @@ public class Area extends Descriptor {
             drafts.clear();
             new Request(GET, "/areas/" + id + "/drafts/")
                 .addToken(Internal.token())
-                .get().asObject()
+                .getJson().asObject()
                 .get("results").asArray()
                 .values().stream()
                 .map(j -> j.asObject().getString("id", "null"))
@@ -314,7 +314,7 @@ public class Area extends Descriptor {
         try {
             ownPostsIDs = new Request(GET, "/areas/" + id + "/own/")
                 .addToken(Internal.token())
-                .get().asObject()
+                .getJson().asObject()
                 .get("results").asArray()
                 .values()
                 .stream()

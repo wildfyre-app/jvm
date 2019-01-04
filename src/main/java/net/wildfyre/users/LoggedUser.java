@@ -128,7 +128,7 @@ public class LoggedUser extends User {
                 new Request(PATCH, "/users/")
                     .addToken(Internal.token())
                     .addJson(json)
-                    .get();
+                    .getJson();
 
                 this.update();
 

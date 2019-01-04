@@ -31,7 +31,7 @@ public class UserTest {
 
     @Before
     public void before() throws Request.CantConnectException {
-        Internal.setToken(RequestTest.token);
+        Internal.setToken(RequestTest.Companion.getToken$wflib_java());
         Internal.init();
     }
 
