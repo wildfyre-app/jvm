@@ -119,7 +119,7 @@ class Area internal constructor (
 
         } catch (e: IssueInTransferException) {
             // TODO: cleanup
-            if (e.json.isPresent && e.json.get().asObject().getString("detail", null) == "Not found.") {
+            if (e.json?.asObject()?.get("detail")?.asString() == "Not found.") {
                 Areas.areas.remove(this.ID)
                 throw NoSuchEntityException("This Area was deleted server-side.", this)
             } else

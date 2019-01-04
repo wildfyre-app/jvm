@@ -26,6 +26,7 @@ import net.wildfyre.http.Request;
 import net.wildfyre.users.Users;
 import net.wildfyre.utils.InvalidCredentialsException;
 
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
@@ -214,8 +215,7 @@ public class Internal {
             Internal.clear();
 
         } catch (IssueInTransferException e) {
-            if(e.getJson()
-                .orElseThrow(RuntimeException::new)
+            if(Objects.requireNonNull(e.getJson())
                 .asObject()
                 .get("non_field_errors")
                 .asArray()

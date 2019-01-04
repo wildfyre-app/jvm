@@ -43,8 +43,8 @@ class RequestTest {
 
             assertNotNull(j.asObject().getString("token", null))
         } catch (e: IssueInTransferException) {
-            if (e.json.isPresent)
-                fail("Issue in transfer: " + e.json.get().toString(PRETTY_PRINT))
+            if (e.json != null)
+                fail("Issue in transfer: " + e.json!!.toString(PRETTY_PRINT))
             else
                 fail("Unknown issue in transfer.")
         }

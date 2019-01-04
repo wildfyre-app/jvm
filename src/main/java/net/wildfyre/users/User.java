@@ -77,8 +77,8 @@ public class User extends Descriptor {
             this.use();
 
         } catch (IssueInTransferException e) {
-            if(e.getJson().isPresent())
-                if(e.getJson().get().asObject().getString("detail", null).equals("Not found.")) {
+            if(e.getJson() != null)
+                if(e.getJson().asObject().getString("detail", null).equals("Not found.")) {
                     Users.users.remove(this.ID);
                     throw new NoSuchEntityException("The requested user does not exist!", this);
                 }
