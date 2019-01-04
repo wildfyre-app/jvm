@@ -31,7 +31,7 @@ public class AreaTest {
 
     @BeforeClass
     static public void before() throws Request.CantConnectException {
-        RequestTest.connectToTestDB();
+        RequestTest.Companion.connectToTestDB();
     }
 
     @Test

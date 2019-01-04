@@ -146,6 +146,7 @@ public class Users {
      */
     public static void reset(){
         userId = -1;
+        users.clear();
     }
 
     /**
@@ -157,7 +158,7 @@ public class Users {
         try {
             JsonObject json = new Request(GET, "/users/")
                 .addToken(Internal.token())
-                .get()
+                .getJson()
                 .asObject();
 
             userId = json.getInt("user", -1);

@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package net.wildfyre.http;
+package net.wildfyre.utils
 
-public enum DataType {
-
-    JSON {
-        @Override
-        public String toString() {
-            return "application/json";
-        }
-    },
-
-    TEXT {
-        @Override
-        public String toString() {
-            return "text/plain";
-        }
-    }
-
-}
+/**
+ * This exception is used to signify impossible errors. If this error ever occurs,
+ * please report to the WildFyre team as something has gone wrong on our side.
+ */
+class ProgrammingException(details: String)
+    : RuntimeException("This should not ever happen. Please contact the WildFyre team.\n$details")

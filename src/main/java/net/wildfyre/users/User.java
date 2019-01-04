@@ -60,7 +60,7 @@ public class User extends Descriptor {
 
         try {
             JsonObject values = new Request(GET, "/users/" + ID + "/")
-                .get()
+                .getJson()
                 .asObject();
 
             // Use the old value as default value: if nothing is specified, keep the old value

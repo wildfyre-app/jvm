@@ -115,7 +115,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
             return new Request(POST, "/areas/" + areaID + "/")
                 .addToken(Internal.token())
                 .addJson(toJsonSimple())
-                .get()
+                .getJson()
                 .asObject();
 
         } catch (IssueInTransferException e) {
@@ -131,7 +131,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
         try {
             return new Request(POST, "/areas/" + areaID + "/drafts/" + postID + "/publish/")
                 .addToken(Internal.token())
-                .get().asObject();
+                .getJson().asObject();
 
         } catch (IssueInTransferException e) {
             throw new RuntimeException(); //TODO: See T262
@@ -164,7 +164,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
             JsonObject json = new Request(POST, "/areas/" + areaID + "/drafts/")
                 .addToken(Internal.token())
                 .addJson(toJsonSimple())
-                .get()
+                .getJson()
                 .asObject();
 
             this.update(json);
@@ -186,7 +186,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
             new Request(PATCH, "/areas/" + areaID + "/drafts/" + postID + "/")
                 .addToken(Internal.token())
                 .addJson(toJsonSimple())
-                .get();
+                .getJson();
             //Nothing to do
 
         } catch (IssueInTransferException e) {
@@ -221,7 +221,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
         try {
             new Request(DELETE, "/areas/" + areaID + "/drafts/" + postID)
                 .addToken(Internal.token())
-                .get();
+                .getJson();
             //Nothing to do
 
         } catch (IssueInTransferException e) {

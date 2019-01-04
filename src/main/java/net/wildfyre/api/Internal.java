@@ -203,7 +203,7 @@ public class Internal {
                 .addJson(new JsonObject()
                     .add("username", username)
                     .add("password", password))
-                .get()
+                .getJson()
                 .asObject();
 
             token = json.getString("token", null);

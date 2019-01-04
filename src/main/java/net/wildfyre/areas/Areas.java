@@ -80,7 +80,7 @@ public class Areas {
         try {
             json = new Request(Method.GET, "/areas/")
                 .addToken(Internal.token())
-                .get()
+                .getJson()
                 .asArray();
 
         } catch (IssueInTransferException e) {

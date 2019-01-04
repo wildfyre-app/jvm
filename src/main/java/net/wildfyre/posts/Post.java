@@ -87,7 +87,7 @@ public class Post extends PostData {
         try {
             JsonObject json = new Request(GET, "/areas/" + areaID + "/" + postID + "/")
                 .addToken(Internal.token())
-                .get()
+                .getJson()
                 .asObject();
 
             super.update(json);
