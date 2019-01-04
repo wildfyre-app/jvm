@@ -20,5 +20,5 @@ package net.wildfyre.utils
  * This exception is used to signify impossible errors. If this error ever occurs,
  * please report to the WildFyre team as something has gone wrong on our side.
  */
-class ProgrammingException(details: String)
-    : RuntimeException("This should not ever happen. Please contact the WildFyre team.\n$details")
+class ProgrammingException(details: String, cause: Exception? = null)
+    : RuntimeException("This should not ever happen. Please contact the WildFyre team.\n$details", cause)
