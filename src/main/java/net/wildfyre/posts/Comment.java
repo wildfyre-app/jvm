@@ -121,7 +121,7 @@ public class Comment {
      * @return The Area.
      */
     public Area area(){
-        return Areas.get(areaID)
+        return Areas.INSTANCE.get(areaID)
             .orElseThrow(RuntimeException::new); // This is not possible: Area doesn't exist
     }
 

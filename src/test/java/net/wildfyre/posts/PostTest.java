@@ -58,7 +58,7 @@ public class PostTest {
 
     @Test
     public void createDraft(){
-        Area a = Areas.get("sample").orElseThrow(RuntimeException::new);
+        Area a = Areas.INSTANCE.get("sample").orElseThrow(RuntimeException::new);
 
         Draft d = a.draft()
             .setText("This is a test")

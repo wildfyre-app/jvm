@@ -41,11 +41,11 @@ public class AreaTest {
 
     @Test
     public void testQuery() throws Request.CantConnectException {
-        Areas.load();
+        Areas.INSTANCE.load();
 
-        assertTrue(Areas.get("sample").isPresent());
-        assertEquals("sample", Areas.get("sample").get().getID());
-        assertEquals("Sample", Areas.get("sample").get().getName());
+        assertTrue(Areas.INSTANCE.get("sample").isPresent());
+        assertEquals("sample", Areas.INSTANCE.get("sample").get().getID());
+        assertEquals("Sample", Areas.INSTANCE.get("sample").get().getName());
     }
 
     @Test
@@ -56,10 +56,10 @@ public class AreaTest {
 
     @Test
     public void noArea() throws Request.CantConnectException {
-        Areas.clear();
-        Areas.load();
+        Areas.INSTANCE.clear();
+        Areas.INSTANCE.load();
 
-        assertFalse( Areas
+        assertFalse( Areas.INSTANCE
             .get("this-area-doesn't-exist-5465454")
             .isPresent()
         );
@@ -71,7 +71,7 @@ public class AreaTest {
         // Since this is not possible to do natively, I load an Area with a good ID, then use reflection to modify
         // that ID, then reload.
 
-        Area area = Areas.get("sample")
+        Area area = Areas.INSTANCE.get("sample")
             .orElseThrow(RuntimeException::new);
 
         Field id = area

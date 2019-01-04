@@ -51,7 +51,7 @@ public class Internal {
      */
     public static void clear(){
         Users.clear();
-        Areas.clear();
+        Areas.INSTANCE.clear();
     }
 
     /**
@@ -61,7 +61,7 @@ public class Internal {
      */
     public static void clean(){
         Users.clean();
-        Areas.clean();
+        Areas.INSTANCE.clean();
     }
 
     /**
@@ -249,7 +249,7 @@ public class Internal {
     public static void init() throws Request.CantConnectException {
         Internal.clear();
         Users.init();
-        Areas.init();
+        Areas.INSTANCE.init();
     }
 
     //endregion

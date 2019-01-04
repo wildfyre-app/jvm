@@ -16,6 +16,8 @@
 
 package net.wildfyre.descriptors;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * Specifies for how long an object is kept in the local cache.
  */
@@ -32,7 +34,7 @@ public class CacheManager {
      * @param millis how long they are kept in the cache, in milliseconds.
      * @return This object, to allow method-chaining.
      */
-    public CacheManager setExpirationTime(long millis){
+    public @NotNull CacheManager setExpirationTime(long millis){
         if(millis < 0)
             throw new IllegalArgumentException("The time 'millis' should not be negative: " + millis);
         else if(millis == 0)
