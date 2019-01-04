@@ -38,7 +38,7 @@ import java.util.stream.Collectors
     value = ["ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"],
     justification = "The static variable 'reqId' is marked as Synchronized to avoid any problems."
 )
-class Request
+internal class Request
 /**
  * Creates a new request to the server, which will be executed on a call such as [get].
  * @param method the HTTP method required by the API
