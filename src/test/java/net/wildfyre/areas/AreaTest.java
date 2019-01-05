@@ -16,6 +16,7 @@
 
 package net.wildfyre.areas;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.Request;
 import net.wildfyre.http.RequestTest;
@@ -29,6 +30,10 @@ import java.lang.reflect.Modifier;
 
 import static org.junit.Assert.*;
 
+@SuppressFBWarnings(
+    value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD",
+    justification = "This is a JUnit rule, it is read by JUnit through reflection, but FindBugs can't see that."
+)
 public class AreaTest {
 
     @BeforeClass

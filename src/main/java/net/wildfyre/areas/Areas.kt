@@ -19,6 +19,7 @@ package net.wildfyre.areas
 import com.eclipsesource.json.JsonObject
 import com.eclipsesource.json.JsonValue
 import com.eclipsesource.json.WriterConfig
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import net.wildfyre.api.Internal
 import net.wildfyre.descriptors.CacheManager
 import net.wildfyre.http.Method
@@ -32,6 +33,10 @@ import kotlin.collections.set
  * This class is a singleton that represents the available areas.
  * @see net.wildfyre.utils.LazyMap Implementation details
  */
+@SuppressFBWarnings(
+    value = ["ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"],
+    justification = "FindBugs displays this warning because it doesn't understand Kotlin's objects."
+)
 object Areas {
 
     internal var areas: MutableMap<String, Area> = HashMap(0)

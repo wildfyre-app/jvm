@@ -64,10 +64,12 @@ class IssueInTransferException : IOException {
     @Throws(NoSuchEntityException::class)
     @JvmOverloads
     fun ifDetailsAre(detail: String, action: ExceptionRunnable, otherwiseDo: ExceptionRunnable? = null) {
-        if (json != null)
-            if (json!!.asObject().getString("detail", null) == detail)
+        json!!.let {
+            if (it.asObject()["detail"]?.asString() == detail)
                 action.run()
-            else otherwiseDo?.run()
+            else
+                otherwiseDo?.run()
+        }
     }
 
     /**
