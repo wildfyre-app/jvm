@@ -47,6 +47,13 @@ javadoc {
     }
 }
 
+test {
+    // Using less cores than available, because JUnit needs some to work
+    maxParallelForks = Runtime.runtime.availableProcessors() - 2
+    if(maxParallelForks <= 0)
+        maxParallelForks = 1
+}
+
 tasks.withType(FindBugs) {
     reports {
         xml.enabled = false
