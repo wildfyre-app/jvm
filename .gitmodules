@@ -1,0 +1,3 @@
+[submodule "api"]
+	path = api
+	url = ssh://vcs@phabricator.wildfyre.net/source/api.git
