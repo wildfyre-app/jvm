@@ -1,5 +1,5 @@
 {
-    "exclude": ["(libs/|wrapper/|gradlew|.idea/)"],
+    "exclude": ["(libs/|wrapper/|gradlew|.idea/|.gitmodules)"],
     "linters": {
         "filename": {
             "type": "filename"
