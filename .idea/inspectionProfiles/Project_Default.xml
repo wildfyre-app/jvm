@@ -4,6 +4,7 @@
     <inspection_tool class="KotlinInternalInJava" enabled="true" level="ERROR" enabled_by_default="true">
       <scope name="Tests" level="WEAK WARNING" enabled="true" />
     </inspection_tool>
+    <inspection_tool class="BashMissingInclude" enabled="true" level="WEAK WARNING" enabled_by_default="true" />
     <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="TYPO" enabled_by_default="true">
       <option name="ignoreObjectMethods" value="false" />
       <option name="ignoreAnonymousClassMethods" value="false" />

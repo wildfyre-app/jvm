@@ -48,6 +48,13 @@ javadoc {
     }
 }
 
+test {
+    // Using less cores than available, because JUnit needs some to work
+    maxParallelForks = Runtime.runtime.availableProcessors() - 2
+    if(maxParallelForks <= 0)
+        maxParallelForks = 1
+}
+
 tasks.withType(FindBugs) {
     reports {
         xml.enabled = false
@@ -71,6 +78,22 @@ clean {
     delete "${rootDir}/http/out"
     delete "${rootDir}/cache/out"
 }
+
+task testAPI(type: Exec) {
+    if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
+        // Checking if the API is running but not launching it,
+        // because it needs to run in another terminal so the log is visible.
+        commandLine './api.sh', '--norun'
+    } else {
+        // The following two lines are included here because they are in the script
+        // but NEED to be executed for platforms that don't support the script too.
+        // They cannot be here for all platforms because this task never executes the script.
+        commandLine 'git', 'submodule', 'init'
+        commandLine 'git', 'submodule', 'update'
+        println("Cannot automatically check if the API is running.")
+    }
+}
+test.dependsOn(testAPI) // The API is needed for testing purposes only
 
 // Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
 // Needed for publishing
