@@ -16,31 +16,41 @@
 
 package net.wildfyre.areas;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.Request;
 import net.wildfyre.http.RequestTest;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import static org.junit.Assert.*;
 
+@SuppressFBWarnings(
+    value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD",
+    justification = "This is a JUnit rule, it is read by JUnit through reflection, but FindBugs can't see that."
+)
 public class AreaTest {
 
     @BeforeClass
-    static public void before() throws Request.CantConnectException {
+    static public void before() {
         RequestTest.Companion.connectToTestDB();
     }
 
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(2);
+
     @Test
     public void testQuery() throws Request.CantConnectException {
-        Areas.load();
+        Areas.INSTANCE.load();
 
-        assertTrue(Areas.get("sample").isPresent());
-        assertEquals("sample", Areas.get("sample").get().ID());
-        assertEquals("Sample", Areas.get("sample").get().name());
+        assertTrue(Areas.INSTANCE.get("sample").isPresent());
+        assertEquals("sample", Areas.INSTANCE.get("sample").get().getID());
+        assertEquals("Sample", Areas.INSTANCE.get("sample").get().getName());
     }
 
     @Test
@@ -51,10 +61,10 @@ public class AreaTest {
 
     @Test
     public void noArea() throws Request.CantConnectException {
-        Areas.clear();
-        Areas.load();
+        Areas.INSTANCE.clear();
+        Areas.INSTANCE.load();
 
-        assertFalse( Areas
+        assertFalse( Areas.INSTANCE
             .get("this-area-doesn't-exist-5465454")
             .isPresent()
         );
@@ -66,12 +76,12 @@ public class AreaTest {
         // Since this is not possible to do natively, I load an Area with a good ID, then use reflection to modify
         // that ID, then reload.
 
-        Area area = Areas.get("sample")
+        Area area = Areas.INSTANCE.get("sample")
             .orElseThrow(RuntimeException::new);
 
         Field id = area
             .getClass()
-            .getDeclaredField("id");
+            .getDeclaredField("ID");
 
         id.setAccessible(true);
 

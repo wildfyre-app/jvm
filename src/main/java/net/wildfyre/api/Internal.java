@@ -17,6 +17,7 @@
 package net.wildfyre.api;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import com.eclipsesource.json.WriterConfig;
 import net.wildfyre.areas.Areas;
 import net.wildfyre.descriptors.Descriptor;
@@ -50,7 +51,7 @@ public class Internal {
      */
     public static void clear(){
         Users.clear();
-        Areas.clear();
+        Areas.INSTANCE.clear();
     }
 
     /**
@@ -60,7 +61,7 @@ public class Internal {
      */
     public static void clean(){
         Users.clean();
-        Areas.clean();
+        Areas.INSTANCE.clean();
     }
 
     /**
@@ -214,15 +215,16 @@ public class Internal {
             Internal.clear();
 
         } catch (IssueInTransferException e) {
-            if(e.getJson()
-                .orElseThrow(RuntimeException::new)
-                .asObject()
-                .get("non_field_errors")
-                .asArray()
-                .get(0)
-                .asString()
-                .equals("Unable to log in with provided credentials."))
-                throw new InvalidCredentialsException("Unable to log in with provided credentials.", e);
+            JsonValue j = e.getJson();
+            if(j != null) {
+                if (j.asObject()
+                    .get("non_field_errors")
+                    .asArray()
+                    .get(0)
+                    .asString()
+                    .equals("Unable to log in with provided credentials."))
+                    throw new InvalidCredentialsException("Unable to log in with provided credentials.", e);
+            }
         }
     }
 
@@ -249,7 +251,7 @@ public class Internal {
     public static void init() throws Request.CantConnectException {
         Internal.clear();
         Users.init();
-        Areas.init();
+        Areas.INSTANCE.init();
     }
 
     //endregion

@@ -17,6 +17,7 @@
 package net.wildfyre.users;
 
 import com.eclipsesource.json.JsonObject;
+import com.eclipsesource.json.JsonValue;
 import net.wildfyre.descriptors.CacheManager;
 import net.wildfyre.descriptors.Descriptor;
 import net.wildfyre.descriptors.NoSuchEntityException;
@@ -77,8 +78,9 @@ public class User extends Descriptor {
             this.use();
 
         } catch (IssueInTransferException e) {
-            if(e.getJson().isPresent())
-                if(e.getJson().get().asObject().getString("detail", null).equals("Not found.")) {
+            JsonValue j = e.getJson();
+            if(j != null)
+                if(j.asObject().getString("detail", null).equals("Not found.")) {
                     Users.users.remove(this.ID);
                     throw new NoSuchEntityException("The requested user does not exist!", this);
                 }

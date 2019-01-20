@@ -207,7 +207,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
     }
 
     void deleteLocal() {
-        Optional<Area> area = Areas.get(areaID);
+        Optional<Area> area = Areas.INSTANCE.get(areaID);
 
         if(area.isPresent())
             area.get().removeCached(this);

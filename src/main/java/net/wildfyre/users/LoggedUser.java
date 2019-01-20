@@ -155,8 +155,8 @@ public class LoggedUser extends User {
      * @see #postsList() This method as a List
      */
     public Stream<Post> posts(){
-        return Areas.stream()
-            .flatMap(Area::ownPosts);
+        return Areas.INSTANCE.collection().stream()
+            .flatMap(a -> a.ownPosts().stream());
     }
 
     /**

@@ -7,6 +7,7 @@ plugins {
     id 'maven' // To export to Maven
     id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
     id 'org.jetbrains.kotlin.jvm' version '1.2.70'
+    id 'org.jetbrains.dokka' version '0.9.17'
 }
 
 group 'net.wildfyre'
@@ -178,5 +179,18 @@ compileKotlin {
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+}
+dokka {
+    outputFormat = 'javadoc'
+    outputDirectory = 'build/docs/dokka'
+    jdkVersion = 8
+    includeNonPublic = false
+    reportUndocumented = true
+
+    linkMapping {
+        dir = "src/"
+        url = "https://phabricator.wildfyre.net/source/libwf-java/browse/master/src/"
+        suffix = "\$"
     }
 }

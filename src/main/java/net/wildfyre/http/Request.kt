@@ -16,9 +16,7 @@
 
 package net.wildfyre.http
 
-import com.eclipsesource.json.Json
-import com.eclipsesource.json.JsonValue
-import com.eclipsesource.json.ParseException
+import com.eclipsesource.json.*
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import net.wildfyre.api.Internal
 import net.wildfyre.http.Request.CantConnectException
@@ -38,7 +36,7 @@ import java.util.stream.Collectors
     value = ["ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"],
     justification = "The static variable 'reqId' is marked as Synchronized to avoid any problems."
 )
-class Request
+internal class Request
 /**
  * Creates a new request to the server, which will be executed on a call such as [get].
  * @param method the HTTP method required by the API
@@ -231,6 +229,16 @@ constructor(private val method: Method, private val address: String) {
         headers["Accept"] = DataType.JSON.toString()
         return readJson(getInputStream(send()))
     }
+
+    /**
+     * Calls [getJson] and performs a cast to [JsonObject], for convenience.
+     */
+    fun getJsonObject(): JsonObject = getJson() as JsonObject
+
+    /**
+     * Calls [getJson] and performs a cast to [JsonArray], for convenience.
+     */
+    fun getJsonArray(): JsonArray = getJson() as JsonArray
 
     //endregion
     //region Helpers

@@ -254,7 +254,7 @@ abstract class PostData extends Descriptor {
      * @return The area in which the post was published.
      */
     public Area area(){
-        return Areas.get(areaID)
+        return Areas.INSTANCE.get(areaID)
             .orElseThrow(() -> new RuntimeException("Couldn't find the area in which this post was created!\n"
             + toString()));
     }

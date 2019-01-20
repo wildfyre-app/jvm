@@ -19,7 +19,8 @@ package net.wildfyre.http
 import com.eclipsesource.json.JsonObject
 import com.eclipsesource.json.WriterConfig.PRETTY_PRINT
 import net.wildfyre.api.WildFyre
-import net.wildfyre.http.Method.*
+import net.wildfyre.http.Method.GET
+import net.wildfyre.http.Method.POST
 import net.wildfyre.users.LoggedUser
 import org.junit.Assert.*
 import org.junit.Test
@@ -42,8 +43,8 @@ class RequestTest {
 
             assertNotNull(j.asObject().getString("token", null))
         } catch (e: IssueInTransferException) {
-            if (e.json.isPresent)
-                fail("Issue in transfer: " + e.json.get().toString(PRETTY_PRINT))
+            if (e.json != null)
+                fail("Issue in transfer: " + e.json!!.toString(PRETTY_PRINT))
             else
                 fail("Unknown issue in transfer.")
         }
@@ -108,7 +109,7 @@ class RequestTest {
         val f = resources["wf.png"]
         assertTrue("The file ${f.absolutePath} should exist!", f.exists())
 
-        val json = Request(PATCH, "/users/")
+        val json = Request(Method.PATCH, "/users/")
             .addFile("avatar", f)
             .addJson(JsonObject().add("bio", "test"))
             .addToken()
