@@ -15,16 +15,26 @@
 #   Displays an error message if the API is not running,         #
 #   or exits silently.                                           #
 #                                                                #
+# ./api.sh --pid                                                 #
+#   Displays the PID of what is running on port 8000             #
+#                                                                #
 ##################################################################
 
-if [[ $(lsof -i :8000 | tail -1 | cut -d ' ' -f1 | grep python) ]]
+if [[ $1 = "--pid" ]]
+then
+    echo $(lsof -i :8000 -sTCP:LISTEN | tail -1 | cut -d ' ' -f2)
+    exit 0
+fi
+
+if [[ $(lsof -i :8000 -sTCP:LISTEN | tail -1 | cut -d ' ' -f2) ]]
 then
     if [[ ! $1 = "--norun" ]]
     then
-        echo "The API is running."
+        echo "Something is running on port 8000."
+        exit 2
     fi
 
-    exit 0 # Success
+    exit 0 # --norun exits successfully if its running already
 else
     if [[ $1 = "--norun" ]]
     then
@@ -62,5 +72,5 @@ else
 
     echo "Starting the development server..."
     python3.6 manage.py sampledata
-    python3.6 manage.py runserver
+    exec python3.6 manage.py runserver
 fi

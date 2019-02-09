@@ -25,7 +25,8 @@ void getVersion(){
     version stdout
         .toString()[1..-2]                      // Remove the \n character at the end of the command and the 'v'
         .replaceFirst("-\\d+-", "-")            // Remove the number of commits
-    println "Detected project version: " + version
+    if ( !project.hasProperty('skipGetVersion') )
+        println "Detected project version: " + version
 }
 
 repositories {
@@ -199,5 +200,18 @@ dokka {
         dir = "src/"
         url = "https://phabricator.wildfyre.net/source/libwf-java/browse/master/src/"
         suffix = "\$"
+    }
+}
+
+task machineReadableTestStatus {
+    doLast {
+        def ret = 0
+        if ( check.state.failure == null ) {
+            ret = ret | 0b01
+        }
+        if ( test.state.failure == null ) {
+            ret = ret | 0b10
+        }
+        println ret
     }
 }

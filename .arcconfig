@@ -1,4 +1,8 @@
 {
   "phabricator.uri" : "https://phabricator.wildfyre.net/",
-  "history.immutable" : true
+  "history.immutable" : true,
+  "load" : [
+    "arcgradle"
+  ],
+  "unit.engine" : "GradleUnitTestEngine"
 }
