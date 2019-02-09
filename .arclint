@@ -24,13 +24,6 @@
 
         "chmod": {
             "type": "chmod"
-        },
-
-        "java": {
-             "type": "script-and-regex",
-             "include": "(src|build.gradle|linter.sh)",
-             "script-and-regex.script": "./linter.sh",
-             "script-and-regex.regex": "/^(?P<message>.*)$/m"
         }
     }
 }
