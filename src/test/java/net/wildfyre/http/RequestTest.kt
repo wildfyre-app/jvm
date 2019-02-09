@@ -93,7 +93,7 @@ class RequestTest {
         return WildFyre.connect(username, password)
     }
 
-    @Test( timeout = 4000L )
+    @Test( timeout = 5000L )
     fun testPatchMethod() {
         val me = createTmpUser()
 
@@ -102,7 +102,7 @@ class RequestTest {
         assertEquals(test, me.bio())
     }
 
-    @Test( timeout = 4000L ) // timeout of 4 seconds
+    @Test( timeout = 5000L ) // timeout of 5 seconds
     fun testMultipart() {
         createTmpUser()
 
