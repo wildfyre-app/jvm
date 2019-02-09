@@ -127,11 +127,18 @@ task publish(dependsOn: uploadArchives){
 }
 publish.finalizedBy closeAndReleaseRepository
 
+if (!hasProperty('nexusUsername')) {
+    ext.nexusUsername = ''
+}
+if (!hasProperty('nexusPassword')) {
+    ext.nexusPassword = ''
+}
+
 // Adapted from https://central.sonatype.org/pages/gradle.html
 uploadArchives {
     repositories {
         mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment)}
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
                 authentication(userName: nexusUsername, password: nexusPassword)
