@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wildfyre.net
+ * Copyright 2019 Wildfyre.net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ public class UserTest {
 
     @Before
     public void before() throws Request.CantConnectException {
-        Internal.setToken(RequestTest.Companion.getToken$wflib_java());
+        Internal.setToken(RequestTest.Companion.getToken());
         Internal.init();
     }
 

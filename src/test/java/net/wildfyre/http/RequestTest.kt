@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 Wildfyre.net
+ * Copyright 2019 Wildfyre.net
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ class RequestTest {
             val j = Request(POST, "/account/auth/")
                 .addJson(JsonObject()
                     .add("username", "user")
-                    .add("password", "password123"))
+                    .add("password", "password$123"))
                 .getJson()
 
             assertNotNull(j.asObject().getString("token", null))
@@ -123,14 +123,14 @@ class RequestTest {
         // because it needs to be done when the class is loaded
         // (init) and NOT when the variables are instantiated.
         @Suppress("JoinDeclarationAndAssignment")
-        internal val token: String
-        internal val resources = File("src/test/resources")
+        val token: String
+        val resources = File("src/test/resources")
 
         init {
             token = Request(POST, "/account/auth/")
                 .addJson(JsonObject()
                     .add("username", "user")
-                    .add("password", "password123"))
+                    .add("password", "password$123"))
                 .getJson().asObject()
                 .getString("token", null)
         }
