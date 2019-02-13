@@ -54,7 +54,7 @@ else
     source env/bin/activate
 
     echo "Installing requirements..."
-    pip3.6 install -r requirements.txt
+    python3.6 -m pip install -r requirements.txt
 
     echo "Preparing the database..."
     rm db.sqlite3
