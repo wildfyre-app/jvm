@@ -17,11 +17,6 @@
             "type": "merge-conflict"
         },
 
-        "text": {
-            "type": "text",
-            "text.max-line-length": 120
-        },
-
         "chmod": {
             "type": "chmod"
         }
