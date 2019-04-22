@@ -7,7 +7,7 @@ variables:
 
 junit:
   stage: test
-  image: java:latest
+  image: clovisai/java-python:latest # The image created in src/test/Dockerfile
   before_script:
     - ./api.sh
   script:
