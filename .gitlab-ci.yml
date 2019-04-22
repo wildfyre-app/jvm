@@ -1,6 +1,5 @@
 stages:
   - test
-  - documentation
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
@@ -30,7 +29,7 @@ static-analysis:
       - build/reports/findbugs/test.html
 
 dokka:
-  stage: documentation
+  stage: test
   image: java:latest
   script:
     - ./gradlew --no-daemon dokka
