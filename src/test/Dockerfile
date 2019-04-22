@@ -1,3 +1,17 @@
+##################################################################
+#                                                                #
+#       Dockerfile that can be used to execute this              #
+#       project's unit tests, with all dependencies validated.   #
+#                                                                #
+#       It also includes the dependencies for the API,           #
+#       however the API itself isn't included. It is the         #
+#       user's responsibility to run the API.                    #
+#                                                                #
+#       This Dockerfile can be found on Dockerhub at             #
+#                   clovisai/wildfyre-java                       #
+#                                                                #
+##################################################################
+
 FROM alpine:3.7
 
 # Get the basics
@@ -10,8 +24,7 @@ RUN apk update \
 RUN apk add --no-cache openjdk8-jre openjdk8
 
 # Get Java sources
-RUN https://github.com/ensime/openjdk8src/blob/master/src.zip?raw=true \
- && mv src.zip?raw=true /usr/lib/jvm/java-8-openjdk-amd64/src.zip
+ADD https://github.com/ensime/openjdk8src/raw/master/src.zip /usr/lib/jvm/java-8-openjdk-amd64
 
 # Get Python
 RUN apk add --no-cache python3 python3-dev py3-virtualenv \
@@ -26,5 +39,10 @@ RUN apk add --no-cache python3 python3-dev py3-virtualenv \
 RUN apk add --no-cache lsof \
  && apk add --no-cache git \
  && apk add --no-cache postgresql-dev \
- && apk add --no-cache gcc \
- && apk add --no-cache libffi
+ && apk add --no-cache gcc musl-dev libc-dev \
+ && apk add --no-cache libffi libffi-dev
+
+# Temporary
+RUN apk add --no-cache zlib zlib-dev
+
+RUN apk add --no-cache libjpeg jpeg jpeg-dev
