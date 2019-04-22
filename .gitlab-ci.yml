@@ -13,8 +13,6 @@ junit:
     - ./api.sh
   script:
     - ./gradlew test
-  after_script:
-    - kill -15 $(./api.sh --pid)
 
 static-analysis:
   stage: test
