@@ -72,5 +72,5 @@ else
 
     echo "Starting the development server..."
     python3.6 manage.py sampledata
-    exec python3.6 manage.py runserver
+    exec python3.6 manage.py runserver &
 fi

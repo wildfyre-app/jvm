@@ -1,0 +1,28 @@
+stages:
+  - test
+  - documentation
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+junit:
+  stage: test
+  image: java:latest
+  before_script:
+    - ./api.sh
+  script:
+    - ./gradlew test
+  after_script:
+    - kill -15 $(./api.sh --pid)
+
+static-analysis:
+  stage: test
+  image: java:latest
+  script:
+    - ./gradlew check
+
+dokka:
+  stage: documentation
+  image: java:latest
+  script:
+    - ./gradlew dokka
