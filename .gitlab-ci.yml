@@ -6,6 +6,7 @@ variables:
   GIT_SUBMODULE_STRATEGY: recursive
   GRADLE_USER_HOME: /cache/.gradle
   PIP_DOWNLOAD_CACHE: /cache/pip
+  PIP_CACHE_DIR: /cache/pip-cache
 
 junit:
   stage: test
@@ -13,16 +14,26 @@ junit:
   before_script:
     - ./api.sh
   script:
-    - ./gradlew test
+    - ./gradlew --no-daemon test
+  artifacts:
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
 
 static-analysis:
   stage: test
   image: clovisai/wildfyre-java:latest
   script:
-    - ./gradlew findbugsMain findbugsTest
+    - ./gradlew --no-daemon findbugsMain findbugsTest
+  artifacts:
+    paths:
+      - build/reports/findbugs/main.html
+      - build/reports/findbugs/test.html
 
 dokka:
   stage: documentation
   image: java:latest
   script:
-    - ./gradlew dokka
+    - ./gradlew --no-daemon dokka
+  artifacts:
+    paths:
+      - build/docs/dokka
