@@ -4,10 +4,8 @@ stages:
 
 variables:
   GIT_SUBMODULE_STRATEGY: recursive
-
-cache:
-  paths:
-    - .gradle
+  GRADLE_USER_HOME: /cache/.gradle
+  PIP_DOWNLOAD_CACHE: /cache/pip
 
 junit:
   stage: test
@@ -16,10 +14,6 @@ junit:
     - ./api.sh
   script:
     - ./gradlew test
-  cache:
-    paths:
-      - .gradle
-      - .cache/pip/wheels
 
 static-analysis:
   stage: test
