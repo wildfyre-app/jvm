@@ -38,10 +38,16 @@ then
 else
     if [[ $1 = "--norun" ]]
     then
-        echo "Nothing is currently running on port 8000."
-        echo "You might need to run ./api.sh to launch the API."
+        if which lsof >/dev/null
+        then
+            echo "Nothing is currently running on port 8000."
+            echo "You might need to run ./api.sh to launch the API."
 
-        exit 1 # Failure
+            exit 1 # Failure
+        else
+            echo "Command 'lsof' is not installed, impossible to know if the API is running or not."
+            echo "Assuming the API is not running, will now attempt to run it."
+        fi
     fi
 
     echo "Setting up the submodule(s)..."
