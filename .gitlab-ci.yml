@@ -16,6 +16,10 @@ junit:
     - ./api.sh
   script:
     - ./gradlew test
+  cache:
+    paths:
+      - .gradle
+      - .cache/pip/wheels
 
 static-analysis:
   stage: test
