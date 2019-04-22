@@ -35,14 +35,12 @@ RUN apk add --no-cache python3 python3-dev py3-virtualenv \
  if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
  rm -r /root/.cache
 
-# Install other tools that are needed for tests
-RUN apk add --no-cache lsof \
- && apk add --no-cache git \
- && apk add --no-cache postgresql-dev \
- && apk add --no-cache gcc musl-dev libc-dev \
- && apk add --no-cache libffi libffi-dev
+# Dependencies for the script 'api.sh'
+RUN apk add --no-cache lsof git
 
-# Temporary
-RUN apk add --no-cache zlib zlib-dev
-
-RUN apk add --no-cache libjpeg jpeg jpeg-dev
+# Dependencies for the API
+RUN apk add --no-cache postgresql-dev gcc \
+    libffi libffi-dev \
+    musl-dev libc-dev \
+    zlib zlib-dev \
+    libjpeg jpeg jpeg-dev
