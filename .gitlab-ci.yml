@@ -31,7 +31,7 @@ static-analysis:
     - mv "src.zip?raw=true" src.zip
     - cd $BACK
   script:
-    - ./gradlew check
+    - ./gradlew findbugsMain findbugsTest
 
 dokka:
   stage: documentation
