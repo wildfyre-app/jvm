@@ -13,7 +13,6 @@ junit:
   stage: test
   image: clovisai/java-python:latest # The image created in src/test/Dockerfile
   before_script:
-    - lsof -i :8000
     - ./api.sh
   script:
     - ./gradlew test
