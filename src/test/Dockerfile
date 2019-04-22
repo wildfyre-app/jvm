@@ -6,7 +6,8 @@ RUN apk update \
  && apk add --no-cache bash \
  && apk add --no-cache --virtual=build-dependencies unzip \
  && apk add --no-cache curl \
- && apk add --no-cache openjdk8-jre
+ && apk add --no-cache openjdk8-jre \
+ && apk add --no-cache openjdk8
 
 # Get Python
 RUN apk add --no-cache python3 \
@@ -19,4 +20,7 @@ RUN apk add --no-cache python3 \
 
 # Install other tools that are needed for tests
 RUN apk add --no-cache lsof \
- && apk add --no-cache py3-virtualenv
+ && apk add --no-cache py3-virtualenv \
+ && apk add --no-cache git \
+ && apk add --no-cache postgresql-dev \
+ && apk add --no-cache gcc

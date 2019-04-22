@@ -24,6 +24,12 @@ junit:
 static-analysis:
   stage: test
   image: java:latest
+  before_script:
+    - BACK=$(pwd)
+    - cd /usr/lib/jvm/java-8-openjdk-amd64
+    - wget https://github.com/ensime/openjdk8src/blob/master/src.zip?raw=true
+    - mv "src.zip?raw=true" src.zip
+    - cd $BACK
   script:
     - ./gradlew check
 
