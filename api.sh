@@ -73,7 +73,7 @@ else
     python3.6 -m pip install -r requirements.txt
 
     echo "Preparing the database..."
-    rm db.sqlite3
+    test -f db.sqlite3 && rm db.sqlite3
     python3.6 manage.py migrate
 
     echo "Starting the development server..."
