@@ -2,7 +2,10 @@ stages:
   - test
 
 variables:
+  # Clone the API automatically
   GIT_SUBMODULE_STRATEGY: recursive
+  # Move tool directories inside /cache/ so they are cached between jobs by the runner.
+  # This way, dependencies are only downloaded once.
   GRADLE_USER_HOME: /cache/.gradle
   PIP_DOWNLOAD_CACHE: /cache/pip
   PIP_CACHE_DIR: /cache/pip-cache
@@ -12,6 +15,10 @@ cache:
     - .gradle
   key: v1
 
+# Run the clean task before any job, because this will detect if the cache is corrupted.
+# If the cache is corrupted (ZipFile error), delete it. The next command will re-download it.
+# The clean task was chosen here because there's nothing to do, so it only takes a few seconds
+# and this step doesn't slow down the pipeline.
 before_script:
   - ./gradlew --no-daemon clean 2> >(grep ZipFile && rm -rf /cache/.gradle/wrapper/dists/*)
 
