@@ -42,18 +42,18 @@ public class PostTest {
 
         assertEquals(3, posts.size());
 
-        Post p1 = posts.get(0);
-        assertFalse(p1.isAnonymous());
-        assertTrue(p1.hasSubscribed());
-        assertTrue(p1.isActive());
-        assertTrue(p1.author().isPresent());
-        assertEquals(Users.me(), p1.author().get());
+        Post p1 = posts.stream().filter(it -> !it.isAnonymous()).findFirst().orElseThrow(RuntimeException::new);
+        assertFalse(p1.toString(), p1.isAnonymous());
+        assertTrue(p1.toString(), p1.hasSubscribed());
+        assertTrue(p1.toString(), p1.isActive());
+        assertTrue(p1.toString(), p1.author().isPresent());
+        assertEquals(p1.toString(), Users.me(), p1.author().get());
 
-        Post p2 = posts.get(1);
-        assertTrue(p2.isAnonymous());
-        assertTrue(p2.hasSubscribed());
-        assertTrue(p2.isActive());
-        assertFalse(p2.author().isPresent());
+        Post p2 = posts.stream().filter(PostData::isAnonymous).findFirst().orElseThrow(RuntimeException::new);
+        assertTrue(p2.toString(), p2.isAnonymous());
+        assertTrue(p2.toString(), p2.hasSubscribed());
+        assertTrue(p2.toString(), p2.isActive());
+        assertFalse(p2.toString(), p2.author().isPresent());
     }
 
     @Test
