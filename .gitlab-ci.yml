@@ -22,6 +22,8 @@ junit:
   artifacts:
     reports:
       junit: build/test-results/test/**/TEST-*.xml
+    paths:
+      - build/reports/tests/test
 
 static-analysis:
   stage: test
