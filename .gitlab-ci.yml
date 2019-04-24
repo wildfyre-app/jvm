@@ -12,12 +12,14 @@ cache:
     - .gradle
   key: v1
 
+before_script:
+  - ./gradlew --no-daemon clean 2> >(grep ZipFile && rm -rf /cache/.gradle/wrapper/dists/*)
+
 junit:
   stage: test
   image: clovisai/wildfyre-java:latest # The image created in src/test/Dockerfile
-  before_script:
-    - ./api.sh
   script:
+    - ./api.sh
     - ./gradlew --no-daemon test
   artifacts:
     reports:
