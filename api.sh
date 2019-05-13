@@ -46,7 +46,8 @@ else
             exit 1 # Failure
         else
             echo "Command 'lsof' is not installed, impossible to know if the API is running or not."
-            echo "Assuming the API is not running, will now attempt to run it."
+
+            exit 1
         fi
     fi
 
