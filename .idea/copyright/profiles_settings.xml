@@ -1,3 +1,7 @@
 <component name="CopyrightManager">
-  <settings default="Wildfyre Apache V2" />
+  <settings>
+    <module2copyright>
+      <element module="Lib_Files" copyright="Wildfyre Apache V2" />
+    </module2copyright>
+  </settings>
 </component>

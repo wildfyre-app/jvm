@@ -38,10 +38,17 @@ then
 else
     if [[ $1 = "--norun" ]]
     then
-        echo "Nothing is currently running on port 8000."
-        echo "You might need to run ./api.sh to launch the API."
+        if which lsof >/dev/null
+        then
+            echo "Nothing is currently running on port 8000."
+            echo "You might need to run ./api.sh to launch the API."
 
-        exit 1 # Failure
+            exit 1 # Failure
+        else
+            echo "Command 'lsof' is not installed, impossible to know if the API is running or not."
+
+            exit 1
+        fi
     fi
 
     echo "Setting up the submodule(s)..."
@@ -57,20 +64,20 @@ else
     if [[ ! -d "env" ]]
     then
         echo "The virtual environment doesn't exist, creating it..."
-        virtualenv env
+        python3 -m venv env/
     fi
 
     echo "Running the virtual environment..."
     source env/bin/activate
 
     echo "Installing requirements..."
-    python3.6 -m pip install -r requirements.txt
+    python3 -m pip install -r requirements.txt
 
     echo "Preparing the database..."
-    rm db.sqlite3
-    python3.6 manage.py migrate
+    rm -f db.sqlite3
+    python3 manage.py migrate
 
     echo "Starting the development server..."
-    python3.6 manage.py sampledata
-    exec python3.6 manage.py runserver
+    python3 manage.py sampledata
+    python3 manage.py runserver &
 fi

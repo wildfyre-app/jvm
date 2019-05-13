@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Lib_Files" pattern="(!lib:*..*||test:*..*)&amp;&amp;!file[libwf-java]:.idea//*&amp;&amp;!file[libwf-java]:api//*&amp;&amp;!file[libwf-java]:docs//*&amp;&amp;!file[libwf-java]:gradle/wrapper//*&amp;&amp;!file[libwf-java]:.gitmodules&amp;&amp;!file[libwf-java]:gradlew&amp;&amp;!file[libwf-java]:gradlew.bat" />
+</component>
