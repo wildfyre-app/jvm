@@ -49,9 +49,20 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    fatJar
+}
+
+jar {
+    doFirst {
+        from { configurations.fatJar.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+}
+
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
+    fatJar group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
     compile 'com.google.code.findbugs:annotations:3.0.1'
     compile 'com.google.code.findbugs:jsr305:3.0.1'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
