@@ -74,7 +74,7 @@ else
     python3 -m pip install -r requirements.txt
 
     echo "Preparing the database..."
-    test -f db.sqlite3 && rm db.sqlite3
+    rm -f db.sqlite3
     python3 manage.py migrate
 
     echo "Starting the development server..."
