@@ -63,20 +63,20 @@ else
     if [[ ! -d "env" ]]
     then
         echo "The virtual environment doesn't exist, creating it..."
-        virtualenv env
+        python3 -m venv env/
     fi
 
     echo "Running the virtual environment..."
     source env/bin/activate
 
     echo "Installing requirements..."
-    python3.6 -m pip install -r requirements.txt
+    python3 -m pip install -r requirements.txt
 
     echo "Preparing the database..."
     test -f db.sqlite3 && rm db.sqlite3
-    python3.6 manage.py migrate
+    python3 manage.py migrate
 
     echo "Starting the development server..."
-    python3.6 manage.py sampledata
-    exec python3.6 manage.py runserver &
+    python3 manage.py sampledata
+    python3 manage.py runserver &
 fi
