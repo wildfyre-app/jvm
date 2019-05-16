@@ -36,7 +36,7 @@ import java.util.stream.Collectors
     value = ["ST_WRITE_TO_STATIC_FROM_INSTANCE_METHOD"],
     justification = "The static variable 'reqId' is marked as Synchronized to avoid any problems."
 )
-internal class Request
+class Request
 /**
  * Creates a new request to the server, which will be executed on a call such as [get].
  * @param method the HTTP method required by the API
@@ -281,7 +281,7 @@ constructor(private val method: Method, private val address: String) {
      * Reads the server's response and handles eventual exceptions.
      * @return The server's response.
      * @throws IssueInTransferException If the server refuses the request, see
-     * [getJson()][IssueInTransferException.getJson] to get the eventual error message.
+     * [getJson()][IssueInTransferException.json] to get the eventual error message.
      */
     @Throws(IssueInTransferException::class)
     internal fun getInputStream(connection: HttpURLConnection): InputStream {

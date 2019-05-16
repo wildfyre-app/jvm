@@ -24,7 +24,7 @@ import java.net.ProtocolException
  *
  * This class is NOT part of the public API.
  */
-internal enum class Method {
+enum class Method {
     /** Change parts of the resource.  */
     PATCH {
         override fun setMethod(conn: HttpURLConnection, req: Request) {
