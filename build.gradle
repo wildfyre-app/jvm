@@ -87,12 +87,6 @@ javadoc {
     }
 }
 
-test {
-    // Using less cores than available, because JUnit needs some to work
-    def runners = Runtime.runtime.availableProcessors() - 2
-    maxParallelForks = runners > 0 ? runners : 1
-}
-
 tasks.withType(FindBugs) {
     reports {
         xml.enabled = false
