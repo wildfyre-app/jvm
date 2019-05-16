@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//region Plugins
+
 import org.gradle.internal.jvm.Jvm
 
 plugins {
@@ -24,7 +26,15 @@ plugins {
     id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
     id 'org.jetbrains.kotlin.jvm' version '1.2.70'
     id 'org.jetbrains.dokka' version '0.9.17'
+    id 'jacoco' // Code coverage
 }
+
+repositories {
+    mavenCentral()
+}
+
+//endregion
+//region Version handling
 
 group 'net.wildfyre'
 getVersion()
@@ -45,9 +55,8 @@ void getVersion(){
         println "Detected project version: " + version
 }
 
-repositories {
-    mavenCentral()
-}
+//endregion
+//region Jar & FatJar
 
 configurations {
     fatJar
@@ -58,6 +67,8 @@ jar {
         from { configurations.fatJar.collect { it.isDirectory() ? it : zipTree(it) } }
     }
 }
+
+//enregion
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -155,6 +166,9 @@ task testAPI(type: Exec) {
 }
 test.dependsOn(testAPI) // The API is needed for testing purposes only
 
+//endregion
+//region Deployment
+
 // Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
 // Needed for publishing
 task javadocJar(type: Jar) {
@@ -238,6 +252,10 @@ uploadArchives {
         }
     }
 }
+
+//enregion
+//region Kotlin settings
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
@@ -249,6 +267,7 @@ compileTestKotlin {
         jvmTarget = "1.8"
     }
 }
+
 dokka {
     outputFormat = 'javadoc'
     outputDirectory = 'build/docs/dokka'
@@ -263,15 +282,4 @@ dokka {
     }
 }
 
-task machineReadableTestStatus {
-    doLast {
-        def ret = 0
-        if ( check.state.failure == null ) {
-            ret = ret | 0b01
-        }
-        if ( test.state.failure == null ) {
-            ret = ret | 0b10
-        }
-        println ret
-    }
-}
+//enregion
