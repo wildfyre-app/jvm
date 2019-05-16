@@ -106,6 +106,39 @@ clean {
     delete "${rootDir}/cache/out"
 }
 
+//region Code coverage
+
+jacoco {
+    toolVersion = "0.8.4"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.enabled true
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+}
+jacocoTestCoverageVerification.dependsOn(test)
+jacocoTestCoverageVerification.finalizedBy(jacocoTestReport)
+
+task coverage {}
+coverage.dependsOn(jacocoTestCoverageVerification)
+
+//endregion
+//region Check the API
+
 task testAPI(type: Exec) {
     if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         // Checking if the API is running but not launching it,
@@ -210,6 +243,7 @@ compileKotlin {
         jvmTarget = "1.8"
     }
 }
+
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
