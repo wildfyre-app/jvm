@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+//region Plugins
+
 import org.gradle.internal.jvm.Jvm
 
 plugins {
@@ -24,7 +26,15 @@ plugins {
     id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
     id 'org.jetbrains.kotlin.jvm' version '1.2.70'
     id 'org.jetbrains.dokka' version '0.9.17'
+    id 'jacoco' // Code coverage
 }
+
+repositories {
+    mavenCentral()
+}
+
+//endregion
+//region Version handling
 
 group 'net.wildfyre'
 getVersion()
@@ -45,9 +55,8 @@ void getVersion(){
         println "Detected project version: " + version
 }
 
-repositories {
-    mavenCentral()
-}
+//endregion
+//region Jar & FatJar
 
 configurations {
     fatJar
@@ -58,6 +67,8 @@ jar {
         from { configurations.fatJar.collect { it.isDirectory() ? it : zipTree(it) } }
     }
 }
+
+//enregion
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
@@ -74,12 +85,6 @@ javadoc {
         addStringOption('link', "https://docs.oracle.com/javase/8/docs/api/")
         //addBooleanOption('html5', true) Only in Java 9+, breaks in Java 8
     }
-}
-
-test {
-    // Using less cores than available, because JUnit needs some to work
-    def runners = Runtime.runtime.availableProcessors() - 2
-    maxParallelForks = runners > 0 ? runners : 1
 }
 
 tasks.withType(FindBugs) {
@@ -106,6 +111,39 @@ clean {
     delete "${rootDir}/cache/out"
 }
 
+//region Code coverage
+
+jacoco {
+    toolVersion = "0.8.4"
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled true
+        html.enabled true
+        html.destination file("${buildDir}/jacocoHtml")
+    }
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.5
+            }
+        }
+    }
+}
+jacocoTestCoverageVerification.dependsOn(test)
+jacocoTestCoverageVerification.finalizedBy(jacocoTestReport)
+
+task coverage {}
+coverage.dependsOn(jacocoTestCoverageVerification)
+
+//endregion
+//region Check the API
+
 task testAPI(type: Exec) {
     if (org.gradle.internal.os.OperatingSystem.current().isLinux()) {
         // Checking if the API is running but not launching it,
@@ -121,6 +159,9 @@ task testAPI(type: Exec) {
     }
 }
 test.dependsOn(testAPI) // The API is needed for testing purposes only
+
+//endregion
+//region Deployment
 
 // Javadoc task as seen at https://central.sonatype.org/pages/gradle.html
 // Needed for publishing
@@ -205,16 +246,22 @@ uploadArchives {
         }
     }
 }
+
+//enregion
+//region Kotlin settings
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
     }
 }
+
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
     }
 }
+
 dokka {
     outputFormat = 'javadoc'
     outputDirectory = 'build/docs/dokka'
@@ -229,15 +276,4 @@ dokka {
     }
 }
 
-task machineReadableTestStatus {
-    doLast {
-        def ret = 0
-        if ( check.state.failure == null ) {
-            ret = ret | 0b01
-        }
-        if ( test.state.failure == null ) {
-            ret = ret | 0b10
-        }
-        println ret
-    }
-}
+//enregion

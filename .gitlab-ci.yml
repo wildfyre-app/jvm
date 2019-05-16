@@ -27,12 +27,15 @@ junit:
   image: clovisai/wildfyre-java:latest # The image created in src/test/Dockerfile
   script:
     - ./api.sh
-    - ./gradlew --no-daemon test
+    - ./gradlew --no-daemon test coverage
+    - awk -F"," '{ instructions += $4 + $5; covered += $5 } END { print covered, "/", instructions, " instructions covered"; print 100*covered/instructions, "% covered" }' build/reports/jacoco/test/jacocoTestReport.csv
   artifacts:
     reports:
       junit: build/test-results/test/TEST-*.xml
     paths:
       - build/reports/tests/test
+      - build/jacocoHtml
+  coverage: '/\d+\.\d+ % covered/'
 
 static-analysis:
   stage: test
