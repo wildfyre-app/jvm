@@ -18,6 +18,7 @@ package net.wildfyre.http
 
 import com.eclipsesource.json.Json
 import com.eclipsesource.json.JsonValue
+import com.eclipsesource.json.ParseException
 import com.eclipsesource.json.WriterConfig
 import net.wildfyre.descriptors.NoSuchEntityException
 import java.io.IOException
@@ -40,7 +41,11 @@ class IssueInTransferException : IOException {
      * @param input the response from the server, that will be parsed as JSON if possible
      */
     constructor(msg: String, input: InputStream) : super(msg) {
-        json = Json.parse(InputStreamReader(input, Request.CHARSET))
+        json = try {
+            Json.parse(InputStreamReader(input, Request.CHARSET))
+        } catch (ex: ParseException) {
+            Json.value("Cannot read JSON.")
+        }
     }
 
     /**
