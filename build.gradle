@@ -20,11 +20,11 @@ import org.gradle.internal.jvm.Jvm
 
 plugins {
     id 'java'
-    id  'com.github.spotbugs' version '1.6.10'
+    id  'com.github.spotbugs' version '1.6.9'
     id 'signing' // To GPG-sign the archives that will be published.
     id 'maven' // To export to Maven
-    id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
-    id 'org.jetbrains.kotlin.jvm' version '1.2.70'
+    id 'io.codearte.nexus-staging' version '0.20.0' // Confirm publication to MavenCentral
+    id 'org.jetbrains.kotlin.jvm' version '1.3.21'
     id 'org.jetbrains.dokka' version '0.9.17'
     id 'jacoco' // Code coverage
 }
@@ -189,8 +189,10 @@ artifacts {
 }
 
 // Configuration for the Signing plugin to GPG-sign the archives (required by Sonatype to accept the new release).
-signing {
-    sign configurations.archives
+if (project.hasProperty("signing.keyId")) {
+    signing {
+        sign configurations.archives
+    }
 }
 
 task publish(dependsOn: uploadArchives){
