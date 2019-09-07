@@ -41,11 +41,11 @@ static-analysis:
   stage: test
   image: clovisai/wildfyre-java:latest
   script:
-    - ./gradlew --no-daemon findbugsMain findbugsTest
+    - ./gradlew --no-daemon spotbugsMain spotbugsTest
   artifacts:
     paths:
-      - build/reports/findbugs/main.html
-      - build/reports/findbugs/test.html
+      - build/reports/spotbugs/main.html
+      - build/reports/spotbugs/test.html
 
 dokka:
   stage: test
