@@ -20,7 +20,7 @@ import org.gradle.internal.jvm.Jvm
 
 plugins {
     id 'java'
-    id 'findbugs'
+    id  'com.github.spotbugs' version '1.6.10'
     id 'signing' // To GPG-sign the archives that will be published.
     id 'maven' // To export to Maven
     id 'io.codearte.nexus-staging' version '0.11.0' // Confirm publication to MavenCentral
@@ -41,6 +41,8 @@ getVersion()
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+def spotbugsVersion = '3.1.12'
 
 void getVersion(){
     def stdout = new ByteArrayOutputStream()
@@ -74,9 +76,11 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
     fatJar group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
-    compile 'com.google.code.findbugs:annotations:3.0.1'
-    compile 'com.google.code.findbugs:jsr305:3.0.1'
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+    api group: 'com.github.spotbugs', name: 'spotbugs', version: spotbugsVersion
+    implementation 'net.jcip:jcip-annotations:1.0'
+    implementation group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: spotbugsVersion
+    api 'com.google.code.findbugs:jsr305:3.0.1'
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 }
 
 javadoc {
@@ -87,19 +91,20 @@ javadoc {
     }
 }
 
-tasks.withType(FindBugs) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
+
+test {
+    // Using less cores than available, because JUnit needs some to work
+    def runners = Runtime.runtime.availableProcessors() - 2
+    maxParallelForks = runners > 0 ? runners : 1
 }
 
-findbugsMain {
-    classpath += files Jvm.current().getJavaHome()
+spotbugs {
+    toolVersion = spotbugsVersion
 }
 
-findbugsTest {
-    classpath += files Jvm.current().getJavaHome()
+tasks.withType(com.github.spotbugs.SpotBugsTask) {
+    reports.xml.enabled = false
+    reports.html.enabled = true
 }
 
 // Removes the directories out/ (created by IntelliJ) and wildfyre.net/ (created by the maven plugin) when calling
