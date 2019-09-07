@@ -231,6 +231,15 @@ constructor(private val method: Method, private val address: String) {
     }
 
     /**
+     * Requests a raw response from the server, and returns it.
+     * @return The raw response from the server, wrapped in an InputStream.
+     */
+    @Throws(IssueInTransferException::class)
+    fun getRaw(): InputStream {
+        return getInputStream(send())
+    }
+
+    /**
      * Calls [getJson] and performs a cast to [JsonObject], for convenience.
      */
     fun getJsonObject(): JsonObject = getJson() as JsonObject

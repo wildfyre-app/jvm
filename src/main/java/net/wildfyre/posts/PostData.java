@@ -106,7 +106,10 @@ abstract class PostData extends Descriptor {
         isAnonymous = requireField(json, "anonym").asBoolean();
         hasSubscribed = requireField(json, "subscribed").asBoolean();
         created = ZonedDateTime.parse(requireField(json, "created").asString());
-        isActive = requireField(json, "active").asBoolean();
+        if(!json.get("active").isNull())
+            isActive = requireField(json, "active").asBoolean();
+        else
+            isActive = true;
         text = requireField(json, "text").asString();
         //TODO: hotfix before T262
         imageURL = optionalField(json, "image").orElse(Json.value("")).asString();
