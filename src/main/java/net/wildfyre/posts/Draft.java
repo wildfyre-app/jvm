@@ -152,9 +152,8 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
      * @return This object itself, to allow method-chaining.
      */
     public Draft save(){
-        if(isOnlyLocal) saveFirstTime();
-        else {          saveAsEdit();
-                        isOnlyLocal = false;}
+        if (isOnlyLocal) saveFirstTime();
+        else             saveAsEdit();
 
         return this;
     }
@@ -169,7 +168,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
 
             this.update(json);
             area().cachedDraft(this);
-
+            isOnlyLocal = false;
         } catch (IssueInTransferException e) {
             e.printStackTrace(); //TODO
 
@@ -221,7 +220,7 @@ public class Draft extends PostData implements PostData.Setters<Draft> {
         try {
             new Request(DELETE, "/areas/" + areaID + "/drafts/" + postID)
                 .addToken(Internal.token())
-                .getJson();
+                .getRaw();
             //Nothing to do
 
         } catch (IssueInTransferException e) {

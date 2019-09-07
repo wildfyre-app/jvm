@@ -20,10 +20,13 @@ import net.wildfyre.areas.Area;
 import net.wildfyre.areas.Areas;
 import net.wildfyre.http.RequestTest;
 import net.wildfyre.users.Users;
+import net.wildfyre.posts.Post;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+
+import com.eclipsesource.json.JsonObject;
 
 import static org.junit.Assert.*;
 
@@ -54,6 +57,32 @@ public class PostTest {
         assertTrue(p2.toString(), p2.hasSubscribed());
         assertTrue(p2.toString(), p2.isActive());
         assertFalse(p2.toString(), p2.author().isPresent());
+
+        assertTrue(p1.equals(p1));
+        assertFalse(p1.equals(p2));
+
+        assertEquals(new Post((PostData)p1), p1);
+
+        assertEquals(p2.commentsList().size(), 2);
+        assertEquals(p2.commentsList().get(0), p2.comments().findFirst().get());
+
+        Comment c1 = p2.commentsList().get(0);
+
+        JsonObject data = new JsonObject();
+        data.set("id", c1.ID());
+        JsonObject author = new JsonObject();
+        author.set("user", c1.author().getID());
+        data.set("author", author);
+        data.set("created", c1.created().toString());
+        data.set("text", c1.text());
+        data.set("imageURL", c1.imageURL().orElse(""));
+        Comment c2 = new Comment(p2, data);
+        assertEquals(c1, c2);
+
+        assertEquals(c1.hashCode(), c2.ID());
+
+        assertEquals(c1.area(), p2.area());
+        assertEquals(c1.post(), p2);
     }
 
     @Test
@@ -61,12 +90,35 @@ public class PostTest {
         Area a = Areas.INSTANCE.get("sample").orElseThrow(RuntimeException::new);
 
         Draft d = a.draft()
-            .setText("This is a test")
+            .setText("This is a test (1)")
             .setIsAnonymous(false)
             .subscribe()
             .save();
 
         assertNotEquals(-1, d.postID);
+
+//        Post p = d.publish();
+//        assertEquals(p.text(), "This is a test (1)");
+//        p.delete();
+
+        d = a.draft()
+            .setText("This is a test (2)")
+            .setIsAnonymous(false)
+            .subscribe();
+
+//        p = d.publish();
+//        assertEquals(p.text(), "This is a test (2)");
+//        p.delete();
+
+        d = a.draft()
+            .setText("This is a test (3)")
+            .setIsAnonymous(true)
+            .subscribe()
+            .save()
+            .setText("This is a test (4)")
+            .save();
+
+        assertEquals(d.text(), "This is a test (4)");
 
         d.delete();
     }
