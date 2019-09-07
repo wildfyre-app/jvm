@@ -20,6 +20,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import net.wildfyre.descriptors.NoSuchEntityException;
 import net.wildfyre.http.Request;
 import net.wildfyre.http.RequestTest;
+import net.wildfyre.posts.Post;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
@@ -29,6 +30,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import static org.junit.Assert.*;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @SuppressFBWarnings(
     value = "URF_UNREAD_PUBLIC_OR_PROTECTED_FIELD",
@@ -107,4 +111,16 @@ public class AreaTest {
         }
     }
 
+    @Test
+    public void testQueuedPosts() throws NoSuchFieldException, IllegalAccessException, Request.CantConnectException, NoSuchEntityException {
+        Area a = new Area("sample", null);
+        a.update(); // this test fails if any exception is thrown, success if no exception is thrown
+        a.loadQueuedPosts(10);
+        assertEquals(a.queuedPosts().size(), 2);
+        List<Post> badPosts = a.queuedPosts().stream()
+                .filter(post -> !post.isActive())
+                .collect(Collectors.toList());
+        assertTrue(badPosts.isEmpty()); // Inactive posts shouldn't get here.
+    }
 }
+

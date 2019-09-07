@@ -99,6 +99,8 @@ class Area internal constructor (
 
     private var ownPostsIDs = emptyList<Long>()
 
+    private var queuedPostsIDs = emptyList<Long>()
+
     override fun cacheManager(): CacheManager {
         return Areas.cacheManager()
     }
@@ -269,7 +271,6 @@ class Area internal constructor (
                 .filterNotNull()
                 .map { it.asString().toLong() }
                 .toList()
-
         } catch (e: IssueInTransferException) {
             throw ProgrammingException("This request shouldn't fail.", e)
         }
@@ -288,6 +289,41 @@ class Area internal constructor (
      */
     fun ownPosts(): List<Post> {
         return ownPostsIDs.asSequence()
+            .map { post(it) }
+            .filterNotNull()
+            .toList()
+    }
+
+    /**
+     * Queries the server for the list of posts that are queued. Note that the posts themselves
+     * aren't loaded, only their ID. This method will save the list internally, but not return it.
+     *
+     * @throws Request.CantConnectException if the lib cannot reach the server
+     * @see queuedPosts
+     */
+    @Throws(Request.CantConnectException::class)
+    fun loadQueuedPosts(count: Int) {
+        try {
+            queuedPostsIDs = Request(GET, "/areas/$ID/?limit=$count")
+                .addToken(Internal.token())
+                .getJsonObject()["results"].asArray().asSequence()
+                .map { it as JsonObject }
+                .map { it["id"] }
+                .filterNotNull()
+                .map { it.asString().toLong() }
+                .toList()
+        } catch (e: IssueInTransferException) {
+            throw ProgrammingException("This request shouldn't fail.", e)
+        }
+    }
+
+    /**
+     * The queue of the next posts in this area
+     * 
+     * @return A Stream of the posts that should be shown to the user
+     */
+    fun queuedPosts(): List<Post> {
+        return queuedPostsIDs.asSequence()
             .map { post(it) }
             .filterNotNull()
             .toList()
