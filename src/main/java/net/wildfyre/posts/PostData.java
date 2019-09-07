@@ -145,7 +145,8 @@ abstract class PostData extends Descriptor {
         authorID = other.authorID;
         areaID = other.areaID;
         postID = other.postID;
-        comments = new ArrayList<>(comments);
+        comments = new ArrayList<Comment>();
+        comments.addAll(other.comments);
     }
 
     //endregion
@@ -408,15 +409,18 @@ abstract class PostData extends Descriptor {
         for(String s : additionalImages)
             images.add(s);
 
-        return new JsonObject()
+        JsonObject ret = new JsonObject()
             .add("anonym", isAnonymous)
             .add("subscribed", hasSubscribed)
             .add("created", created.format(DateTimeFormatter.ISO_DATE_TIME))
             .add("text", text)
-            .add("image", imageURL)
             .add("additional_images", images);
+        if (imageURL != null && !imageURL.isEmpty())
+            ret.add("image", imageURL);
+        return ret;
     }
 
     //endregion
 
 }
+

@@ -90,7 +90,15 @@ class RequestTest {
             .getJson().asObject()
 
         WildFyre.disconnect()
-        return WildFyre.connect(username, password)
+        assertFalse(WildFyre.isConnected())
+        val u = WildFyre.connect(username, password)
+        assertTrue(WildFyre.isConnected())
+        return u
+    }
+
+    @Test( expected = NullPointerException::class )
+    fun testConnect() {
+            WildFyre.connect(null)
     }
 
     @Test( timeout = 5000L )
